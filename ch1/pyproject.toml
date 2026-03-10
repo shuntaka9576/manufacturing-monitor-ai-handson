@@ -1,0 +1,19 @@
+[project]
+name = "ch1"
+version = "0.1.0"
+description = "ch1: Spec駆動開発 - プロジェクト基盤 & DB"
+requires-python = ">=3.12"
+dependencies = [
+    "streamlit>=1.45.0",
+    "pandas>=2.2.0",
+    "plotly>=6.0.0",
+    "openpyxl>=3.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

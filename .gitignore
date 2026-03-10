@@ -1,0 +1,10 @@
+**/data/*.db
+.venv/
+__pycache__/
+*.pyc
+.streamlit/
+.pytest_cache/
+.hypothesis/
+.DS_Store
+node_modules/
+.turbo/

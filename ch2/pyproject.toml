@@ -1,0 +1,19 @@
+[project]
+name = "ch2"
+version = "0.1.0"
+description = "ch2: Plan then Execute - ダッシュボード & 設備詳細ページ"
+requires-python = ">=3.12"
+dependencies = [
+    "streamlit>=1.45.0",
+    "pandas>=2.2.0",
+    "plotly>=6.0.0",
+    "openpyxl>=3.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

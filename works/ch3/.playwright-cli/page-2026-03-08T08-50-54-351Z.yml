@@ -1,0 +1,240 @@
+- generic [active]:
+  - generic [ref=e2]:
+    - generic [ref=e13]:
+      - paragraph [ref=e17]: 設備を選択
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: CNC旋盤 A-01
+          - combobox "Selected CNC旋盤 A-01. 設備を選択" [ref=e23]
+        - img "open" [ref=e25]
+    - generic [ref=e3]:
+      - banner [ref=e29]:
+        - generic [ref=e32]:
+          - button "Deploy" [ref=e34] [cursor=pointer]:
+            - generic [ref=e36]: Deploy
+          - button [ref=e38] [cursor=pointer]:
+            - img [ref=e39]
+      - generic [ref=e42]:
+        - heading "🔧 設備ダッシュボード" [level=1] [ref=e47]:
+          - text: 🔧 設備ダッシュボード
+          - generic [ref=e48]:
+            - link "Link to heading":
+              - /url: "#e73830a3"
+              - img
+        - generic [ref=e50]:
+          - paragraph [ref=e57]:
+            - strong [ref=e58]: 種類
+            - text: ": CNC旋盤"
+          - paragraph [ref=e65]:
+            - strong [ref=e66]: 設置場所
+            - text: ": A棟1F"
+          - paragraph [ref=e73]:
+            - strong [ref=e74]: 設備ID
+            - text: ": 1"
+        - separator [ref=e79]
+        - heading "センサーデータ推移" [level=3] [ref=e84]:
+          - text: センサーデータ推移
+          - generic [ref=e85]:
+            - link "Link to heading":
+              - /url: "#73cfa3cf"
+              - img
+        - paragraph [ref=e90]: "最新値: 2026-03-08T10:12"
+        - generic [ref=e92]:
+          - generic [ref=e100]:
+            - img
+            - img:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: "40.1"
+                  - generic:
+                    - generic:
+                      - generic: "0"
+                    - generic:
+                      - generic: "20"
+                    - generic:
+                      - generic: "40"
+                    - generic:
+                      - generic: "60"
+                    - generic:
+                      - generic: "80"
+                  - generic: 温度 (℃)
+            - toolbar [ref=e101]:
+              - button "Download plot as a PNG" [ref=e103] [cursor=pointer]:
+                - img [ref=e104]
+              - button "Fullscreen" [ref=e107] [cursor=pointer]:
+                - img [ref=e108]
+            - img
+          - generic [ref=e117]:
+            - img
+            - img:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: "1.59"
+                  - generic:
+                    - generic:
+                      - generic: "0"
+                    - generic:
+                      - generic: "2"
+                    - generic:
+                      - generic: "4"
+                    - generic:
+                      - generic: "6"
+                  - generic: 振動 (mm/s)
+            - toolbar [ref=e118]:
+              - button "Download plot as a PNG" [ref=e120] [cursor=pointer]:
+                - img [ref=e121]
+              - button "Fullscreen" [ref=e124] [cursor=pointer]:
+                - img [ref=e125]
+            - img
+          - generic [ref=e134]:
+            - img
+            - img:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: "1820"
+                  - generic:
+                    - generic:
+                      - generic: "0"
+                    - generic:
+                      - generic: "1000"
+                    - generic:
+                      - generic: "2000"
+                    - generic:
+                      - generic: "3000"
+                    - generic:
+                      - generic: "4000"
+                  - generic: 回転数 (RPM)
+            - toolbar [ref=e135]:
+              - button "Download plot as a PNG" [ref=e137] [cursor=pointer]:
+                - img [ref=e138]
+              - button "Fullscreen" [ref=e141] [cursor=pointer]:
+                - img [ref=e142]
+            - img
+          - generic [ref=e151]:
+            - img
+            - img:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: "13.15"
+                  - generic:
+                    - generic:
+                      - generic: "0"
+                    - generic:
+                      - generic: "5"
+                    - generic:
+                      - generic: "10"
+                    - generic:
+                      - generic: "15"
+                    - generic:
+                      - generic: "20"
+                  - generic: 電力 (kW)
+            - toolbar [ref=e152]:
+              - button "Download plot as a PNG" [ref=e154] [cursor=pointer]:
+                - img [ref=e155]
+              - button "Fullscreen" [ref=e158] [cursor=pointer]:
+                - img [ref=e159]
+            - img
+        - generic [ref=e162]:
+          - tablist [ref=e164]:
+            - tab "温度 (℃)" [selected] [ref=e165] [cursor=pointer]:
+              - paragraph [ref=e167]: 温度 (℃)
+            - tab "振動 (mm/s)" [ref=e168] [cursor=pointer]:
+              - paragraph [ref=e170]: 振動 (mm/s)
+            - tab "回転数 (RPM)" [ref=e171] [cursor=pointer]:
+              - paragraph [ref=e173]: 回転数 (RPM)
+            - tab "電力 (kW)" [ref=e174] [cursor=pointer]:
+              - paragraph [ref=e176]: 電力 (kW)
+          - tabpanel "温度 (℃)" [ref=e179]:
+            - generic [ref=e186]:
+              - img:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: 09:00Mar 7, 2026
+                      - generic:
+                        - generic: 12:00
+                      - generic:
+                        - generic: 15:00
+                      - generic:
+                        - generic: 18:00
+                      - generic:
+                        - generic: 21:00
+                      - generic:
+                        - generic: 00:00Mar 8, 2026
+                      - generic:
+                        - generic: 03:00
+                      - generic:
+                        - generic: 06:00
+                      - generic:
+                        - generic: 09:00
+                    - generic:
+                      - generic:
+                        - generic: "30"
+                      - generic:
+                        - generic: "35"
+                      - generic:
+                        - generic: "40"
+                      - generic:
+                        - generic: "45"
+                      - generic:
+                        - generic: "50"
+                      - generic:
+                        - generic: "55"
+                      - generic:
+                        - generic: "60"
+              - img:
+                - generic:
+                  - generic:
+                    - generic: 時刻
+                  - generic:
+                    - generic: 温度 (℃)
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: 警告
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: 危険
+              - toolbar [ref=e200]:
+                - button "Download plot as a PNG" [ref=e202] [cursor=pointer]:
+                  - img [ref=e203]
+                - generic [ref=e205]:
+                  - button "Zoom" [ref=e206] [cursor=pointer]:
+                    - img [ref=e207]
+                  - button "Pan" [ref=e209] [cursor=pointer]:
+                    - img [ref=e210]
+                - generic [ref=e212]:
+                  - button "Zoom in" [ref=e213] [cursor=pointer]:
+                    - img [ref=e214]
+                  - button "Zoom out" [ref=e216] [cursor=pointer]:
+                    - img [ref=e217]
+                  - button "Autoscale" [ref=e219] [cursor=pointer]:
+                    - img [ref=e220]
+                  - button "Reset axes" [ref=e222] [cursor=pointer]:
+                    - img [ref=e223]
+                - button "Fullscreen" [ref=e226] [cursor=pointer]:
+                  - img [ref=e227]
+              - img
+        - separator [ref=e233]
+        - heading "ステータス変更履歴" [level=3] [ref=e238]:
+          - text: ステータス変更履歴
+          - generic [ref=e239]:
+            - link "Link to heading":
+              - /url: "#abfbd263"
+              - img
+        - generic [ref=e244]:
+          - button "Show/hide columns" [ref=e248] [cursor=pointer]:
+            - img [ref=e249]
+          - button "Download as CSV" [ref=e254] [cursor=pointer]:
+            - img [ref=e255]
+          - button "Search" [ref=e260] [cursor=pointer]:
+            - img [ref=e261]
+          - button "Fullscreen" [ref=e266] [cursor=pointer]:
+            - img [ref=e267]
+  - img [ref=e278]

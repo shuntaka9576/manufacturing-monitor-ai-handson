@@ -1,0 +1,20 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "lint:spell": {
+      "cache": false
+    },
+    "lint:text": {
+      "cache": false
+    },
+    "lint:format": {
+      "cache": false
+    },
+    "fix:text": {
+      "cache": false
+    },
+    "fix:format": {
+      "cache": false
+    }
+  }
+}
