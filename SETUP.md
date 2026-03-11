@@ -4,11 +4,11 @@
 
 ## 必須ツール（全チャプター共通）
 
-| ツール                            | バージョン | 提供元                     | 用途                             |
-| --------------------------------- | ---------- | -------------------------- | -------------------------------- |
-| [Python](https://www.python.org/) | 3.12以上   | Python Software Foundation | アプリケーション実行             |
-| [uv](https://docs.astral.sh/uv/)  | 0.10.4     | Astral                     | Pythonパッケージ管理・タスク実行 |
-| [Kiro](https://kiro.dev/)         | 最新       | Amazon                     | AI駆動開発IDE                    |
+| ツール                             | バージョン | 提供元                     | 用途                             |
+| ---------------------------------- | ---------- | -------------------------- | -------------------------------- |
+| [Python](https://www.python.org/)  | 3.12以上   | Python Software Foundation | アプリケーション実行             |
+| [uv](https://docs.astral.sh/uv/)   | 0.10.4     | Astral                     | Pythonパッケージ管理・タスク実行 |
+| [Kiro](https://kiro.dev/)          | 最新       | Amazon                     | AI駆動開発IDE                    |
 | [SQLite3](https://www.sqlite.org/) | 3.x        | SQLite Consortium          | DBレコード確認                   |
 
 ## チャプター別の追加ツール
