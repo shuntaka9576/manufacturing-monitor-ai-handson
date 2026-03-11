@@ -201,7 +201,7 @@ Excelのシート構造の詳細はSteeringを参照してください。
 
 ### 2.4. 設計ファイル(task.md) の作成
 
-作成したら、Sonnet 4.6に変更してタスクを進めます。
+作成したら、Sonnet 4.6に変更してタスクを進めます。クレジット消費を抑えるため、タスク実行にはSonnetを使用します。
 
 ![img](../assets/ch1/07.png)
 
@@ -213,7 +213,7 @@ Excelのシート構造の詳細はSteeringを参照してください。
 
 ![img](../assets/ch1/09.png)
 
-グレーアウトされているところは実行しなくて問題ないです。
+グレーアウトされているタスクはオプショナルタスク（テスト関連など）です。Spec作成時に「Keep optional tasks (faster MVP)」が選択された場合に生成されます。これらは実行しなくて問題ないです。必要に応じて「Make task required」で必須に変更することもできます。
 ![img](../assets/ch1/11.png)
 
 ```
@@ -237,19 +237,24 @@ uv run python db/seed.py
 
 # テスト実行（現在はフィクスチャのみ）
 uv run pytest tests/test_seed.py -v
+```
 
-# sqlite3 CLIで接続
+sqlite3 CLIで接続し、データを確認します。
+
+```bash
 sqlite3 data/factory.db
+```
 
+```sql
 .tables                          -- テーブル一覧
 .schema equipment                -- スキーマ確認
 
-# レコード数をカウント
+-- レコード数をカウント
 SELECT COUNT(*) FROM equipment;
 SELECT COUNT(*) FROM status_logs;
 SELECT COUNT(*) FROM sensor_readings;
 
-# データの中身が正しく入っていることを確認
+-- データの中身が正しく入っていることを確認
 SELECT * FROM equipment;
 SELECT * FROM sensor_readings WHERE equipment_id = 1 LIMIT 5;
 
