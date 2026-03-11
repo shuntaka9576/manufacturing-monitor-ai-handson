@@ -213,7 +213,7 @@ Excelのシート構造の詳細はSteeringを参照してください。
 
 ![img](../assets/ch1/09.png)
 
-グレーアウトされているタスクはオプショナルタスク（テスト関連など）です。Spec作成時に「Keep optional tasks (faster MVP)」が選択された場合に生成されます。これらは実行しなくて問題ないです。必要に応じて「Make task required」で必須に変更することもできます。
+グレーアウトされているタスクはオプショナルタスク（テスト関連など）です。Spec作成時に「Keep optional tasks (faster MVP)」が選択された場合に生成されます。これらは実行しなくて問題ないです。必要に応じて「Make task required」で必須に変更できます。
 ![img](../assets/ch1/11.png)
 
 ```
