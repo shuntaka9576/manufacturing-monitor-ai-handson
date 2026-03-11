@@ -13,10 +13,10 @@
 
 ## チャプター別の追加ツール
 
-| ツール                                                         | 対象チャプター | 提供元            | 用途               |
-| -------------------------------------------------------------- | -------------- | ----------------- | ------------------ |
-| [Node.js](https://nodejs.org/)                                 | ch3            | OpenJS Foundation | playwright-cli実行 |
-| [playwright-cli](https://github.com/anthropics/playwright-cli) | ch3            | Microsoft         | ブラウザ自動操作   |
+| ツール                                                        | 対象チャプター | 提供元            | 用途               |
+| ------------------------------------------------------------- | -------------- | ----------------- | ------------------ |
+| [Node.js](https://nodejs.org/)                                | ch3            | OpenJS Foundation | playwright-cli実行 |
+| [playwright-cli](https://github.com/microsoft/playwright-cli) | ch3            | Microsoft         | ブラウザ自動操作   |
 
 ### Pythonライブラリ一覧
 

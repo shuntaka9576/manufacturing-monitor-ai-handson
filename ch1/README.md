@@ -98,7 +98,7 @@ graph LR
 
 - [ ] エクセルシートと比較して、ざっくりあっていることを確認してください
 
-### 1.4. 解析結果をSteeringに登録する
+### 1.3. 解析結果をSteeringに登録する
 
 1.2のチャットの続きで、以下のプロンプトを入力して解析結果をSteeringに登録します。
 
@@ -199,7 +199,7 @@ Excelのシート構造の詳細はSteeringを参照してください。
 
 - 問題なければ、Continueを押下し、Generate Tasksを押下します。
 
-### 2.3. 設計ファイル(task.md) の作成
+### 2.4. 設計ファイル(task.md) の作成
 
 作成したら、Sonnet 4.6に変更してタスクを進めます。
 
@@ -228,6 +228,9 @@ Excelのシート構造の詳細はSteeringを参照してください。
 
 エクセルの内容がDBに入っていることがざっくり確認できること
 
+> [!NOTE]
+> AIの出力により、DBファイルのパスやテーブル名が以下の例と異なる場合があります。実際に生成されたコードに合わせて読み替えてください。
+
 ```bash
 # シードスクリプト単体実行
 uv run python db/seed.py
@@ -236,22 +239,22 @@ uv run python db/seed.py
 uv run pytest tests/test_seed.py -v
 
 # sqlite3 CLIで接続
-sqlite3 db/equipment_monitoring.db
+sqlite3 data/factory.db
 
 .tables                          -- テーブル一覧
 .schema equipment                -- スキーマ確認
 
 # レコード数をカウント
 SELECT COUNT(*) FROM equipment;
-SELECT COUNT(*) FROM status_history;
-SELECT COUNT(*) FROM sensor_data;
+SELECT COUNT(*) FROM status_logs;
+SELECT COUNT(*) FROM sensor_readings;
 
 # データの中身が正しく入っていることを確認
 SELECT * FROM equipment;
-SELECT * FROM sensor_data WHERE equipment_id = 1 LIMIT 5;
+SELECT * FROM sensor_readings WHERE equipment_id = 1 LIMIT 5;
 
 -- 外部キー確認
-PRAGMA foreign_key_list(status_history);
+PRAGMA foreign_key_list(status_logs);
 
 .quit
 ```
@@ -295,4 +298,4 @@ AIに任せたテストケースは冗長であるケースが多いです。生
 各設備のセンサーデータについて、直近6件の移動平均温度を計算し、現在値が移動平均の1.5倍を超えるレコードを異常候補として抽出してください
 ```
 
-生成されたSQLを `sqlite3 db/equipment_monitoring.db` で実行して、結果を確認してみてください。
+生成されたSQLを `sqlite3 data/factory.db` で実行して、結果を確認してみてください（パスはAIの出力に合わせて読み替えてください）。

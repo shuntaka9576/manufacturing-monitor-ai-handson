@@ -55,7 +55,7 @@ npm install -g @playwright/cli@0.1.1
 npx playwright install ffmpeg
 ```
 
-### 0.2. アプリケーションの起動
+### 0.3. アプリケーションの起動
 
 ```bash
 uv sync
