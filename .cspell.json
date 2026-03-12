@@ -30,6 +30,7 @@
     "isort",
     "kiro",
     "networkidle",
+    "notna",
     "numpy",
     "openpyxl",
     "pfnet",
