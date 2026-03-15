@@ -268,3 +268,45 @@ playwright-cliを使って情報を収集し、原因を特定してください
 
 4. AIが原因を特定し修正案を提示できることを確認する
 5. 修正を適用してダッシュボードが正常に戻ることを確認する
+
+### 6.2. 認証済みブラウザを操作する
+
+Webアプリは通常認証が入っているケースがほとんどです。Chrome拡張を使うと、ログイン済みのブラウザにそのまま接続してplaywright-cliで操作できます。
+
+- **エビデンス取得・デバッグ**: 認証済みブラウザに接続することで、ログイン後の画面に対してもスクリーンショット取得やDOM構造の確認ができる
+- **AIエージェントによる社内ツールの自動化**: AIエージェントにplaywright-cliスキルを組み込むことで、認証が必要な社内ツールの定型操作（レポート取得、ステータス更新など）を自動化できる
+
+> [!WARNING]
+> この拡張はブラウザのデバッグ権限を持ち、認証状態・Cookieにアクセスできます。信頼できる環境でのみ使用し、企業のセキュリティポリシー（Developer Mode制限等）を事前に確認してください。
+
+#### 手順
+
+1. Chromeに [Playwright MCP Bridge](https://chromewebstore.google.com/detail/playwright-mcp-bridge/mmlmfjhmonkocbjadbfplnigmagldckm) 拡張をインストールする
+
+デベロッパーがMicrosoftであり、ソースコードも[microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp)で公開されているため、拡張自体は一定の信頼性があります。
+
+![img](../assets/ch3/09.png)
+
+2. 既存ブラウザに接続してページを開く
+
+```bash
+playwright-cli --extension open 'https://example.com'
+```
+
+3. スクリーンショットを取得する
+
+```bash
+playwright-cli screenshot
+```
+
+4. snapshotで画面構造を確認する
+
+```bash
+playwright-cli snapshot
+```
+
+5. 操作が終わったらブラウザを閉じる
+
+```bash
+playwright-cli close
+```
