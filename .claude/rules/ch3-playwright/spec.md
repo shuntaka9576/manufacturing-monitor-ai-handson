@@ -1,15 +1,18 @@
 ---
 paths:
-  - "ch3/**/*"
+  - "ch3-playwright/**/*"
 ---
 
-# ch3: Agent Skills - playwright-cliによるUI動作確認 - 実装仕様
+# ch3-playwright: Agent Skills - playwright-cliによるUI動作確認 - 実装仕様
 
 ## 追加ファイル
 
 ```
-ch3/
-├── .kiro/skills/
+ch3-playwright/
+├── .kiro/skills/              # Kiro版
+│   └── playwright-cli/
+│       └── SKILL.md
+├── .claude/skills/            # Claude Code版
 │   └── playwright-cli/
 │       └── SKILL.md          # Microsoft公式 playwright-cli スキル
 └── (ch2の全ファイル)

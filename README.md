@@ -2,23 +2,28 @@
 
 製造業向け設備稼働状況可視化アプリを、AI駆動開発の手法で段階的に構築するハンズオン教材です。
 
+Kiro IDE 版と Claude Code（CLI）版の両方を用意しています。どちらのツールで進めるかを最初に選び、以降は同じ系統（`*.kiro.md` もしくは `*.claude.md`）を読んでください。
+
 ## セットアップ
 
-必要なツールとインストール手順は[セットアップガイド](./SETUP.md)を参照してください。
+必要なツールとインストール手順は、使うAIツールに対応する方を参照してください。
+
+- [Kiro 版セットアップガイド](./SETUP.kiro.md)
+- [Claude Code 版セットアップガイド](./SETUP.claude.md)
 
 ## チャプター構成
 
-各チャプターは独立した uv プロジェクトです。Kiroでchapterディレクトリを直接開いて演習します。
+各チャプターは独立した uv プロジェクトです。チャプターディレクトリを直接開いて演習します。
 
 各チャプターの完成形が次のチャプターの開始状態になるプログレッシブ構成です。
 
-| チャプター | 内容                   | 所要時間 |
-| ---------- | ---------------------- | -------- |
-| ch1        | Spec駆動開発           | 約1時間  |
-| ch2        | Plan then Execute      | 約1時間  |
-| ch3        | Agent Skills           | 約30分   |
-| ch4        | ruffによる静的解析改善 | 約15分   |
-| ch5        | PLaMo Embedding        | 応用編   |
+| チャプター     | 内容                   | 所要時間 |
+| -------------- | ---------------------- | -------- |
+| ch1            | Spec駆動開発           | 約1時間  |
+| ch2            | Plan then Execute      | 約1時間  |
+| ch3-playwright | Agent Skills           | 約30分   |
+| ch4            | ruffによる静的解析改善 | 約15分   |
+| ch5            | PLaMo Embedding        | 応用編   |
 
 全体像はこちら
 
@@ -30,28 +35,34 @@
 > [!WARNING]
 > 各チャプターは続きから行うことを推奨します。これはLLMが非決定的な出力をした結果として進行が詰まる可能性があるためです。ご了承ください。
 
-### [ch1: Spec駆動開発 - プロジェクト基盤 & DB](./ch1/README.md)（所要時間: 約1時間）
+### ch1: Spec駆動開発 - プロジェクト基盤 & DB（所要時間: 約1時間）
 
-**AI手法**: Kiroの Spec駆動開発
+**AI手法**: Spec駆動開発（Kiro版: Spec モード、Claude Code 版: [spec-kit](https://github.com/github/spec-kit)）
 
-DB スキーマとシードデータ生成の基盤を作成します。Spec ファイルに要件を記述し、Kiro にコードを生成させます。
+- [Kiro 版](./ch1/README.kiro.md)
+- [Claude Code 版](./ch1/README.claude.md)
+
+DB スキーマとシードデータ生成の基盤を作成します。Spec ファイルに要件を記述し、AIにコードを生成させます。
 
 **開始状態**: `pyproject.toml` + 仕様書のみ（コードなし）
 **完成形**: → ch2 の開始状態
 
 ```bash
 cd ch1
-# Kiroで開いて演習を実施
+# Kiro もしくは Claude Code で開いて演習を実施
 ```
 
-### [ch2: Plan then Execute - ダッシュボード & 設備詳細ページ](./ch2/README.md)（所要時間: 約1時間）
+### ch2: Plan then Execute - ダッシュボード & 設備詳細ページ（所要時間: 約1時間）
 
-**AI手法**: Kiroの Plan then Execute
+**AI手法**: Plan then Execute（Kiro版: Vibe モードで計画→実装、Claude Code 版: ネイティブ プランモード）
+
+- [Kiro 版](./ch2/README.kiro.md)
+- [Claude Code 版](./ch2/README.claude.md)
 
 KPI 指標、設備一覧テーブル、ステータス分布チャート、設備詳細ページを含むダッシュボードを作成します。
 
 **開始状態**: ch1完成コード（DB基盤）
-**完成形**: → ch3 の開始状態
+**完成形**: → ch3-playwright の開始状態
 
 ```bash
 cd ch2 && uv sync
@@ -59,28 +70,34 @@ uv run python db/seed.py
 uv run streamlit run app.py
 ```
 
-### [ch3: Agent Skills - playwright-cliによるUI動作確認](./ch3/README.md)（所要時間: 約30分）
+### ch3-playwright: Agent Skills - playwright-cliによるUI動作確認（所要時間: 約30分）
 
-**AI手法**: Agent Skills（playwright-cli）
+**AI手法**: Agent Skills（playwright-cli スキル）
 
-Agent Skillsでplaywright-cliスキルを導入し、ブラウザ自動操作によるUI動作確認を体験します。
+- [Kiro 版](./ch3-playwright/README.kiro.md)
+- [Claude Code 版](./ch3-playwright/README.claude.md)
+
+Agent Skills で playwright-cli スキルを導入し、ブラウザ自動操作によるUI動作確認を体験します。
 
 **開始状態**: ch2完成コード（DB + UI）
 **完成形**: → ch4 の開始状態
 
 ```bash
-cd ch3 && uv sync
+cd ch3-playwright && uv sync
 uv run python db/seed.py
 uv run streamlit run app.py
 ```
 
-### [ch4: ruffによる静的解析改善](./ch4/README.md)（所要時間: 約15分）
+### ch4: ruffによる静的解析改善（所要時間: 約15分）
 
-**AI手法**: Kiroで実装（手法は任意）
+**AI手法**: 任意（プロンプトのみ。Kiro でも Claude Code でも可）
+
+- [Kiro 版](./ch4/README.kiro.md)
+- [Claude Code 版](./ch4/README.claude.md)
 
 ruff を使い、既存コードの品質を静的解析で改善します。
 
-**開始状態**: ch3完成コード（DB + UI + テスト）
+**開始状態**: ch3-playwright 完成コード（DB + UI + テスト）
 **完成形**: → ch5 の開始状態
 
 ```bash
@@ -88,9 +105,12 @@ cd ch4 && uv sync
 uv run ruff check .
 ```
 
-### [ch5: PLaMo Embedding - 意味類似検索](./ch5/README.md)（応用編）
+### ch5: PLaMo Embedding - 意味類似検索（応用編）
 
-**AI手法**: Kiroで実装（手法は任意）
+**AI手法**: 任意（プロンプトのみ。Kiro でも Claude Code でも可）
+
+- [Kiro 版](./ch5/README.kiro.md)
+- [Claude Code 版](./ch5/README.claude.md)
 
 PLaMo Embedding を使い、ステータス変更履歴を自然言語で意味類似検索できるページを追加します。
 

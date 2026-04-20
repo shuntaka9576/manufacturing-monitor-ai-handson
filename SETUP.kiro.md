@@ -15,8 +15,8 @@
 
 | ツール                                                        | 対象チャプター | 提供元            | 用途               |
 | ------------------------------------------------------------- | -------------- | ----------------- | ------------------ |
-| [Node.js](https://nodejs.org/)                                | ch3            | OpenJS Foundation | playwright-cli実行 |
-| [playwright-cli](https://github.com/microsoft/playwright-cli) | ch3            | Microsoft         | ブラウザ自動操作   |
+| [Node.js](https://nodejs.org/)                                | ch3-playwright | OpenJS Foundation | playwright-cli実行 |
+| [playwright-cli](https://github.com/microsoft/playwright-cli) | ch3-playwright | Microsoft         | ブラウザ自動操作   |
 
 ### Pythonライブラリ一覧
 
@@ -122,7 +122,7 @@ sqlite3 ":memory:" "CREATE TABLE test(id INTEGER, name TEXT); INSERT INTO test V
 # 1|hello と表示されればOK
 ```
 
-### 5. Node.js（ch3で必要）
+### 5. Node.js（ch3-playwright で必要）
 
 wingetでインストールします。
 
@@ -137,7 +137,7 @@ node --version
 # v22.x.x 以上であればOK
 ```
 
-### 6. playwright-cli（ch3で必要）
+### 6. playwright-cli（ch3-playwright で必要）
 
 Node.jsインストール後に以下を実行します。
 
