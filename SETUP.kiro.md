@@ -13,12 +13,12 @@
 
 ## チャプター別の追加ツール
 
-| ツール                                                        | 対象チャプター                     | 提供元            | 用途                        |
-| ------------------------------------------------------------- | ---------------------------------- | ----------------- | --------------------------- |
+| ツール                                                        | 対象チャプター                     | 提供元            | 用途                         |
+| ------------------------------------------------------------- | ---------------------------------- | ----------------- | ---------------------------- |
 | [Node.js](https://nodejs.org/)                                | ch3-playwright / ch3-skill-creator | OpenJS Foundation | playwright-cli / skills 実行 |
-| [playwright-cli](https://github.com/microsoft/playwright-cli) | ch3-playwright                     | Microsoft         | ブラウザ自動操作            |
-| [pnpm](https://pnpm.io/)                                      | ch3-skill-creator                  | pnpm              | Node パッケージマネージャ   |
-| [skills](https://www.npmjs.com/package/skills)                | ch3-skill-creator                  | vercel-labs       | Agent Skills 導入・管理 CLI |
+| [playwright-cli](https://github.com/microsoft/playwright-cli) | ch3-playwright                     | Microsoft         | ブラウザ自動操作             |
+| [pnpm](https://pnpm.io/)                                      | ch3-skill-creator                  | pnpm              | Node パッケージマネージャ    |
+| [skills](https://www.npmjs.com/package/skills)                | ch3-skill-creator                  | vercel-labs       | Agent Skills 導入・管理 CLI  |
 
 ### Pythonライブラリ一覧
 
