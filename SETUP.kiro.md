@@ -13,10 +13,12 @@
 
 ## チャプター別の追加ツール
 
-| ツール                                                        | 対象チャプター | 提供元            | 用途               |
-| ------------------------------------------------------------- | -------------- | ----------------- | ------------------ |
-| [Node.js](https://nodejs.org/)                                | ch3-playwright | OpenJS Foundation | playwright-cli実行 |
-| [playwright-cli](https://github.com/microsoft/playwright-cli) | ch3-playwright | Microsoft         | ブラウザ自動操作   |
+| ツール                                                        | 対象チャプター                     | 提供元            | 用途                        |
+| ------------------------------------------------------------- | ---------------------------------- | ----------------- | --------------------------- |
+| [Node.js](https://nodejs.org/)                                | ch3-playwright / ch3-skill-creator | OpenJS Foundation | playwright-cli / skills 実行 |
+| [playwright-cli](https://github.com/microsoft/playwright-cli) | ch3-playwright                     | Microsoft         | ブラウザ自動操作            |
+| [pnpm](https://pnpm.io/)                                      | ch3-skill-creator                  | pnpm              | Node パッケージマネージャ   |
+| [skills](https://www.npmjs.com/package/skills)                | ch3-skill-creator                  | vercel-labs       | Agent Skills 導入・管理 CLI |
 
 ### Pythonライブラリ一覧
 
@@ -162,5 +164,29 @@ npx playwright install ffmpeg
 ```powershell
 npx playwright-cli --version
 ```
+
+### 7. pnpm + skills CLI（ch3-skill-creator で必要）
+
+ch3-skill-creator では `vercel-labs/skills` CLI を使って Agent Skills を導入します。pnpm の `minimum-release-age` を使ったサプライチェーン防御が学習ポイントです。
+
+Node.js 付属の Corepack で pnpm を有効化します。
+
+```powershell
+corepack enable
+corepack prepare pnpm@10.33.0 --activate
+pnpm --version
+# 10.16 以上であればOK（minimum-release-age 対応）
+```
+
+skills CLI はグローバルインストールせず、章ディレクトリの `package.json` に devDependency として固定されています。章ディレクトリでの動作確認:
+
+```powershell
+cd ch3-skill-creator
+pnpm install
+pnpm exec -- skills --version
+# 1.4.6 と表示されればOK
+```
+
+章の詳細は [ch3-skill-creator/README.kiro.md](./ch3-skill-creator/README.kiro.md) を参照してください。
 
 各チャプターの起動方法は [README.md](./README.md) のチャプター構成を参照してください。
