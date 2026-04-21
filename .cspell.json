@@ -16,6 +16,7 @@
   "words": [
     "AUTOINCREMENT",
     "agentskills",
+    "anthropics",
     "bfloat",
     "capsys",
     "dataframe",
@@ -23,6 +24,7 @@
     "executemany",
     "executescript",
     "frombuffer",
+    "frontmatter",
     "handson",
     "hline",
     "hoverinfo",
