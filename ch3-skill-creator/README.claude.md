@@ -212,7 +212,10 @@ claude
 
 ## 2. 「稼働日報生成スキル」の初版を作成する（約8分｜経過 約19分）
 
-ch2 の SQLite DB（`data/factory.db`）を題材に、**前日 24 時間分の設備稼働レポート**を Markdown で出力するスキルを作ります。
+ch2 の SQLite DB（`data/factory.db`）を題材に、**指定日 24 時間分の設備稼働レポート**を Markdown で出力するスキルを作ります。
+
+> [!NOTE]
+> seed データ（`sample_data.xlsx`）は **2026-03-01 〜 2026-03-08** の固定期間なので、本章では対象日を **2026-03-07** に固定します。実運用スキルでは「昨日」を既定にしつつ、任意の対象日を引数で受けられるよう設計するのが良いでしょう（Phase 6 の発展課題参照）。
 
 ### 2.1. skill-creator に依頼
 
@@ -222,7 +225,7 @@ Claude Code で以下を入力します。
 /skill-creator を使って、以下の要件のスキルを作成してください。
 
 - スキル名: daily-operations-report
-- 目的: data/factory.db から前日 24 時間分の設備稼働データを集計し、日報を Markdown で出力する
+- 目的: data/factory.db から指定日 24 時間分の設備稼働データを集計し、日報を Markdown で出力する（既定の対象日は 2026-03-07、任意日を引数で受け取れる設計）
 - 集計内容:
   - 設備別の稼働時間 / 停止時間 / 異常停止件数
   - 期間中の総生産数
@@ -250,10 +253,10 @@ cat .claude/skills/daily-operations-report/SKILL.md
 Claude Code で以下を入力します。
 
 ```text
-昨日の稼働日報を出力してください
+2026-03-07 の稼働日報を出力してください
 ```
 
-`daily-operations-report` スキルが自動でトリガーされ、`reports/YYYY-MM-DD-operations.md` が生成されます。
+`daily-operations-report` スキルが自動でトリガーされ、`reports/2026-03-07-operations.md` が生成されます。
 
 ### チェック項目
 
@@ -270,18 +273,28 @@ Agent Skills は 3 つの Level で遅延ロードされる設計です（Progre
 
 重い情報を Level 3 に退避するのが鉄則です。skill-creator にレビューを依頼します。
 
+> [!NOTE]
+> **なぜ skill-creator は初版で綺麗に作ってくれないのか（マッチポンプ疑惑）**
+>
+> 「新規生成の時点で Progressive Disclosure を満たしてくれればレビュー不要では？」は正当な疑問です。しかし、この 2 パス構造は skill-creator の限界ではなく、**情報が生成行為によってしか現れない問題に対する合理的設計**と見るのが正確です。
+>
+> 1. **初版作成時には配置判断の根拠が存在しない** — 「何が重くて何を分離すべきか」を決めたくても、SQL の具体形も SKILL.md 本文の量もまだ存在しない。分離点を決める材料がない。
+> 2. **生成した成果物そのものが、次パスの入力コンテキストになる** — 一度作って実体（Level 2 の膨らみ方、scripts に出せる純粋コード、references に出せる仕様情報）を手に入れて、はじめて最適配置を判断できる。
+> 3. **ソフトウェア設計で見慣れたパターン** — Spike → Refactor / 下書き → 推敲 / Actor-Critic / Reflection loops。いずれも「作ってみないと構造が決まらない問題」を 2 パスで解く手法。
+> 4. **教育的デザインとしても意図的** — Phase 2 で「わざと粗い初版を作る」と明示しており、**差分**（初版 → 改善版）を体験させることが狙い。
+>
+> 実運用でも「生成 → 実測 → 構造化」のサイクルは有効です。AI が作るスキルも、生成したものを実測して構造を整える工程があってはじめて筋の通った資産になる、という学びを持ち帰ってください。
+
 ### 4.1. レビュー依頼
 
-```text
-/skill-creator で .claude/skills/daily-operations-report/ をレビューしてください。
-Progressive Disclosure の 3 レベル視点で改善提案と実装をしてください。
+> [!IMPORTANT]
+> ここは **Plan モード** で実行してください。Claude Code のプロンプト下部が `auto mode on` や `accept edits on` になっている場合は、`Shift+Tab` を押して `plan mode on` に切り替えます。Plan モードでは skill-creator が提案プランのみを出力し、ファイル変更は行いません。受講者が **何を指摘してきたか** を吟味してから適用するのがこのフェーズの学びです。
 
-- Level 1: description を「何をする/いつ使うか」に精緻化し、トリガー精度を上げる
-- Level 2: SKILL.md 本文を high-level guide にし、SQL やスキーマ詳細は references/ へ退避
-- Level 3: 集計ロジックを scripts/aggregate.py、出力テンプレを assets/report-template.md に分離
+```text
+/skill-creator で .claude/skills/daily-operations-report/ をレビューして、気になった点を改善してください。
 ```
 
-skill-creator が差分を提案してきたら内容を確認しつつ適用します。
+観点を人間側から指示する必要はありません。Progressive Disclosure の評価は skill-creator 自身が持つべき知識です。skill-creator が差分を提案してきたら、**どのレベルの問題をどう指摘してきたか**に注目しつつ適用してください（Plan を承認すると自動で通常モードに戻り、実装が走ります）。
 
 ### 4.2. 改善後の構造を確認
 
@@ -308,7 +321,7 @@ skill-creator が差分を提案してきたら内容を確認しつつ適用し
 ### 4.3. 改善版で再実行
 
 ```text
-昨日の稼働日報を出力してください
+2026-03-07 の稼働日報を出力してください
 ```
 
 同じプロンプトで再生成し、トリガー精度・出力品質の変化を観察します。

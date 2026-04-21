@@ -100,8 +100,8 @@ pnpm exec -- skills add anthropics/skills --skill skill-creator -a kiro-cli -y
 
 | 確認項目 | 使用コマンド |
 | --- | --- |
-| 自動トリガー | チャットに「昨日の稼働日報を出力してください」 |
-| 出力ファイル | `reports/YYYY-MM-DD-operations.md` |
+| 自動トリガー | チャットに「2026-03-07 の稼働日報を出力してください」（seed データが 2026-03 固定のため対象日を固定） |
+| 出力ファイル | `reports/2026-03-07-operations.md` |
 
 ### Phase 4: Progressive Disclosure レビュー
 
