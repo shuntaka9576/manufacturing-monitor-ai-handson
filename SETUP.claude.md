@@ -2,6 +2,13 @@
 
 このハンズオンを **Claude Code（CLI）** で進めるためのツールインストール手順です。macOS / Linux / Windows（WSL 推奨）を対象とします。
 
+対象環境ごとに以下の手順ブロックを選んでください。
+
+- **macOS**: Homebrew 前提の手順（macOS / Linux 共通ブロック）を実行
+- **Linux**: apt / curl ベースの手順（macOS / Linux 共通ブロック）を実行
+- **Windows (CMD / PowerShell)**: 各ツールの `Windows (CMD / PowerShell)` details を参照（CMD でも PowerShell でも実行可能）
+- **WSL を使う場合**: 上記の **macOS / Linux 手順** をそのまま実行してください（WSL 内は Linux 環境です）
+
 ## 必須ツール（全チャプター共通）
 
 | ツール                                                                | バージョン | 提供元                     | 用途                             |
@@ -37,6 +44,15 @@
 | transformers  | 最新       |     |     |                |                   |     | ✓   | Hugging Face Transformers   |
 | sentencepiece | 最新       |     |     |                |                   |     | ✓   | トークナイザー              |
 
+## サプライチェーンセキュリティ方針
+
+ハンズオン中に OSS / npm パッケージを取り込む箇所では、以下の方針で版を固定し、リリース直後の悪性パッケージ取り込みを避けます。
+
+- **Python ライブラリ**: 各チャプターの `uv.lock` に検証済みバージョンを記録。受講者は `uv sync` で同じ状態を再現できます
+- **npm 経由ツール（playwright-cli 等）**: `@0.1.1` のように **バージョン pin** してインストール
+- **Anthropic 公式プラグイン（ch3-skill-creator）**: Claude Code 公式マーケットプレイス経由で `/plugin marketplace add anthropics/skills` を登録し、`/plugin install skill-creator@anthropic-agent-skills` で取り込みます。配布元は Anthropic 公式リポジトリ（`anthropics/skills`）に限定され、必要に応じて `anthropics/skills#v1.0.0` のようにタグ指定でバージョン pin 可能です
+- **ベースツール（Python / uv / Node.js / SQLite3 / GitHub CLI / Claude Code）**: 各プロジェクト公式のインストーラ／パッケージマネージャ経由のみを案内（環境差を避けるため厳密な pin は行いません）
+
 ## インストール手順
 
 ### 1. Python
@@ -44,7 +60,7 @@
 macOS / Linux は既存のPythonで3.12以上を確認してください。Windowsはwingetでインストールします。
 
 <details>
-<summary>Windows</summary>
+<summary>Windows (CMD / PowerShell)</summary>
 
 ```powershell
 winget install -e --id Python.Python.3.12
@@ -67,7 +83,7 @@ curl -LsSf https://astral.sh/uv/0.11.3/install.sh | sh
 ```
 
 <details>
-<summary>Windows</summary>
+<summary>Windows (CMD / PowerShell)</summary>
 
 ```powershell
 # Windows PowerShell
@@ -93,7 +109,7 @@ brew install node
 ```
 
 <details>
-<summary>Windows</summary>
+<summary>Windows (CMD / PowerShell)</summary>
 
 ```powershell
 winget install -e --id OpenJS.NodeJS.LTS
@@ -116,10 +132,10 @@ curl -fsSL https://claude.ai/install.sh | bash
 ```
 
 <details>
-<summary>Windows</summary>
+<summary>Windows (CMD / PowerShell)</summary>
 
 ```powershell
-irm https://claude.ai/install.ps1 | iex
+powershell -Command "irm https://claude.ai/install.ps1 | iex"
 ```
 
 </details>
@@ -144,7 +160,7 @@ sqlite3 --version
 ```
 
 <details>
-<summary>Windows</summary>
+<summary>Windows (CMD / PowerShell)</summary>
 
 ```powershell
 winget install -e --id SQLite.SQLite
@@ -192,10 +208,10 @@ curl -fsSL https://get.pnpm.io/install.sh | sh -
 ```
 
 <details>
-<summary>Windows</summary>
+<summary>Windows (CMD / PowerShell)</summary>
 
 ```powershell
-Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
+powershell -Command "Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression"
 ```
 
 </details>
@@ -245,7 +261,7 @@ brew upgrade gh
 ```
 
 <details>
-<summary>Windows</summary>
+<summary>Windows (CMD / PowerShell)</summary>
 
 ```powershell
 winget upgrade GitHub.cli
