@@ -14,12 +14,12 @@
 
 ## チャプター別の追加ツール
 
-| ツール                                                        | 対象チャプター    | 提供元      | 用途                        |
-| ------------------------------------------------------------- | ----------------- | ----------- | --------------------------- |
-| [spec-kit](https://github.com/github/spec-kit)                | ch1                                | GitHub      | Spec駆動スキル導入          |
-| [pnpm](https://pnpm.io/)                                      | ch3-playwright / ch3-skill-creator | pnpm        | Node パッケージマネージャ   |
-| [playwright-cli](https://github.com/microsoft/playwright-cli) | ch3-playwright                     | Microsoft   | ブラウザ自動操作            |
-| [skills](https://www.npmjs.com/package/skills)                | ch3-skill-creator                  | vercel-labs | Agent Skills 導入・管理 CLI |
+| ツール                                                        | 対象チャプター    | 提供元    | 用途                            |
+| ------------------------------------------------------------- | ----------------- | --------- | ------------------------------- |
+| [spec-kit](https://github.com/github/spec-kit)                | ch1               | GitHub    | Spec駆動スキル導入              |
+| [pnpm](https://pnpm.io/)                                      | ch3-playwright    | pnpm      | Node パッケージマネージャ       |
+| [playwright-cli](https://github.com/microsoft/playwright-cli) | ch3-playwright    | Microsoft | ブラウザ自動操作                |
+| [GitHub CLI](https://cli.github.com/)                         | ch3-skill-creator | GitHub    | `gh skill` で Agent Skills 導入 |
 
 ### Pythonライブラリ一覧
 
@@ -184,7 +184,7 @@ specify init --here --ai claude
 
 ### 7. pnpm
 
-pnpm 公式のスタンドアロンスクリプトでインストールします（pnpm 10 は `manage-package-manager-versions` で自己管理するため Corepack 不要）。
+ch3-playwright で使用します。pnpm 公式のスタンドアロンスクリプトでインストールします（pnpm 10 は `manage-package-manager-versions` で自己管理するため Corepack 不要）。
 
 ```bash
 # macOS / Linux
@@ -233,17 +233,37 @@ playwright install ffmpeg
 playwright-cli --version
 ```
 
-### 9. skills CLI
+### 9. gh skill（ch3-skill-creator 簡単版）
 
-ch3-skill-creator では `vercel-labs/skills` CLI を使って Agent Skills を導入します。pnpm の `minimum-release-age` を使ったサプライチェーン防御が学習ポイントです。
+ch3-skill-creator では GitHub CLI v2.90.0+ に組み込まれた `gh skill` サブコマンドで Agent Skills を導入します（Public Preview のため仕様変更の可能性あり）。
 
-skills CLI はグローバルインストールせず、章ディレクトリの `package.json` に devDependency として固定されています。章ディレクトリでの動作確認:
+gh 本体を最新化します。
 
 ```bash
-cd ch3-skill-creator
-pnpm install
-pnpm exec -- skills --version
-# 1.4.6 と表示されればOK
+# macOS
+brew upgrade gh
+```
+
+<details>
+<summary>Windows</summary>
+
+```powershell
+winget upgrade GitHub.cli
+```
+
+</details>
+
+動作確認します。
+
+```bash
+gh --version
+# 2.90.0 以上であればOK
+```
+
+skill-creator の導入コマンド（章ディレクトリで実行）:
+
+```bash
+gh skill install anthropics/skills skill-creator --agent claude-code --pin <タグ>
 ```
 
 章の詳細は [ch3-skill-creator/README.claude.md](./ch3-skill-creator/README.claude.md) を参照してください。

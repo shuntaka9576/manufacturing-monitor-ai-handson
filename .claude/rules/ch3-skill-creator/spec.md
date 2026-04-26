@@ -5,17 +5,18 @@ paths:
 
 # ch3-skill-creator: Agent Skills - skill-creator によるスキル開発 - 実装仕様
 
-## 追加ファイル
+## 章の構成
+
+**前半（Phase 0〜5）**: Claude Code 公式マーケットプレイスから skill-creator を導入 → 設備稼働日報スキルを構築 → Progressive Disclosure でレビュー改善 → AskUserQuestion を組み込み
+
+**後半（Phase 6〜7）**: サードパーティ製スキル管理ツール（`gh skill`）を紹介
+
+## 追加ファイル（章ディレクトリ）
 
 ```
 ch3-skill-creator/
-├── package.json                   # skills CLI を devDependency で exact pin、packageManager: pnpm@x.y.z
-├── pnpm-lock.yaml                 # integrity ハッシュつき（コミット対象）
-├── .npmrc                         # minimum-release-age=30240（21日を分換算）
-├── .gitignore                     # node_modules/
-├── skills-lock.json               # ハンズオン中に生成（コミット対象）
 ├── .claude/skills/                # Claude Code 版
-│   ├── skill-creator/             # skills CLI で導入
+│   ├── skill-creator/             # 公式マケプレから /plugin install で導入
 │   └── daily-operations-report/   # skill-creator で自作
 ├── .kiro/skills/                  # Kiro 版（Kiro を使う場合）
 │   ├── skill-creator/
@@ -23,70 +24,40 @@ ch3-skill-creator/
 └── (ch2 の全ファイル)
 ```
 
-## 設定ファイルの仕様
-
-### package.json
-
-```json
-{
-  "name": "ch3-skill-creator",
-  "private": true,
-  "packageManager": "pnpm@10.33.0",
-  "devDependencies": {
-    "skills": "1.4.6"
-  }
-}
-```
-
-- `skills` は `vercel-labs/skills` の npm パッケージ（Agent Skills 導入・管理 CLI）
-- **exact pin**（プレフィックス無し）または `^` で指定
-- `scripts` は受講者が直接コマンドを打つ体験を重視し、事前定義しない
-
-### .npmrc
-
-```
-minimum-release-age=30240
-```
-
-- pnpm 10.16+ の機能。単位は**分**（30240 分 = 21 日）。公開指定期間未満のバージョンを `pnpm install` がレジストリ側で拒否
+**本章で新たに生成するのは `.claude/skills/` と `reports/` のみ**。pnpm / npm 関連ファイル（package.json, .npmrc, pnpm-lock.yaml, node_modules, skills-lock.json）は一切扱わない。
 
 ## スキルセットアップ手順
 
-### Claude Code 版
+### Claude Code 版（公式マケプレ経由）
 
-```bash
-pnpm install                                                                 # CLI と依存を lockfile 通りに取得
-pnpm exec -- skills add anthropics/skills --skill skill-creator -a claude-code -y
+```text
+/plugin marketplace add anthropics/skills
+/plugin install skill-creator@anthropic-agent-skills
 ```
 
-- 配置先: `.claude/skills/skill-creator/`
-- `skills-lock.json` が自動生成される
+- `anthropics/skills` の `.claude-plugin/marketplace.json` で marketplace 名は `anthropic-agent-skills`
+- バージョン固定したい場合は `anthropics/skills#v1.0.0` のようにタグを指定して marketplace を追加
 
 ### Kiro 版
 
-```bash
-pnpm install
-pnpm exec -- skills add anthropics/skills --skill skill-creator -a kiro-cli -y
-```
-
-- 配置先: `.kiro/skills/skill-creator/`
+Kiro の plugin/marketplace 対応状況は別途確認。未対応なら後半の `gh skill` を主導線にする選択肢も検討。
 
 ## ハンズオンフェーズ
 
 ### Phase 0: 環境確認
 
-- `node -v` が 22.x 以上、`pnpm -v` が 10.16 以上
 - `uv sync && uv run python db/seed.py && uv run streamlit run app.py` でダッシュボードが動く
 
-### Phase 1: skills CLI のセキュアな導入
+### Phase 1: skill-creator を公式マケプレから導入
 
-| 確認項目                         | 使用コマンド                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `minimum-release-age` が効くこと | `pnpm pkg set "devDependencies.skills=^1.5.1" && pnpm install` で `ERR_PNPM_NO_MATURE_MATCHING_VERSION` |
-| CLI のインストール               | `pnpm install`                                                                                          |
-| integrity ハッシュの固定         | `cat pnpm-lock.yaml`                                                                                    |
-| skill-creator の導入             | `pnpm exec -- skills add anthropics/skills --skill skill-creator -a <agent> -y`                         |
-| skills-lock.json 生成            | `cat skills-lock.json`                                                                                  |
+| 確認項目                   | 使用コマンド                                                      |
+| -------------------------- | ----------------------------------------------------------------- |
+| マーケットプレイス追加     | `/plugin marketplace add anthropics/skills`                       |
+| マーケットプレイス登録確認 | `/plugin marketplace list`（`anthropic-agent-skills` が出ること） |
+| skill-creator インストール | `/plugin install skill-creator@anthropic-agent-skills`            |
+| インストール結果確認       | `/plugin list`（enabled 表示）／`/` 補完で `skill-creator` 表示   |
+
+**ねらい**: 追加ツール不要で Anthropic 公式スキルを入れる公式導線を体験する。
 
 ### Phase 1.6: 組み込みサブエージェントで仕様調査
 
@@ -96,17 +67,17 @@ pnpm exec -- skills add anthropics/skills --skill skill-creator -a kiro-cli -y
 | 別タスク表示（Claude Code 版）               | UI に `Task(claude-code-guide)` ブロックが折り畳み表示される                                       |
 | Vibe モードでの同等調査（Kiro 版）           | チャットに同等プロンプトを投げて、frontmatter と askQuestions 相当の情報を取得                     |
 
-**ねらい**: built-in subagent（Claude Code）でメインセッションのコンテキストを汚さず仕様調査する体験。Kiro には同等の built-in が無いため、チャットで直接聞く形となり、サブエージェント有無の差を体感できる。
+**ねらい**: built-in subagent（Claude Code）でメインセッションのコンテキストを汚さず仕様調査する体験。
 
 ### Phase 1.7: 対話確認ツールを直接体験
 
-| 確認項目                                         | 期待結果                                                                 |
-| ------------------------------------------------ | ------------------------------------------------------------------------ |
-| Claude Code 版: `AskUserQuestion` を直接呼ばせる | 出力先・フォーマット・閾値など 3 問を選択肢 UI で聞かれる                |
-| Kiro 版: `askQuestions` 相当を呼ばせる           | 同等の 3 問を UI で聞かれる（Experimental のため代替テキスト確認でも可） |
-| 余計な実装に進まないこと                         | 回答後、「了解しました」程度の返答で止まり、スキル作成は後段で実施       |
+| 確認項目                                         | 期待結果                                                           |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| Claude Code 版: `AskUserQuestion` を直接呼ばせる | 出力先・フォーマット・閾値など 3 問を選択肢 UI で聞かれる          |
+| Kiro 版: `askQuestions` 相当を呼ばせる           | 同等の 3 問を UI で聞かれる                                        |
+| 余計な実装に進まないこと                         | 回答後、「了解しました」程度の返答で止まり、スキル作成は後段で実施 |
 
-**ねらい**: スキルに組み込ませる前に、ツール本体の挙動（選択肢 UI、3 問一括、"Other" 自由入力）を手で触る。Phase 2 の「最小情報で粗い初版」フローを汚さないよう、ここでの回答は後段に引き継がない。
+**ねらい**: スキルに組み込ませる前に、ツール本体の挙動を手で触る。
 
 ### Phase 2: 「稼働日報生成スキル」初版作成
 
@@ -131,7 +102,7 @@ pnpm exec -- skills add anthropics/skills --skill skill-creator -a kiro-cli -y
 | Level 2    | SKILL.md 本文                      | 500 行未満、high-level guide 化        |
 | Level 3    | `scripts/` `references/` `assets/` | 集計ロジック・テンプレ・スキーマを分離 |
 
-### Phase 4.4: 対話確認の追加（AskUserQuestion / askQuestions）
+### Phase 4.4: 対話確認の追加
 
 | シナリオ               | 期待結果                                                        |
 | ---------------------- | --------------------------------------------------------------- |
@@ -139,27 +110,36 @@ pnpm exec -- skills add anthropics/skills --skill skill-creator -a kiro-cli -y
 | 既存レポートと同じ日付 | 「上書き / 別名で保存 / 中断」の 3 択 UI を提示                 |
 | スキル本体への組み込み | `SKILL.md` もしくは `scripts/` に対話ツール呼び出しが記述される |
 
-**ねらい**: 「最小の指示で動くスキル」→「実運用で任せられる対話型スキル」への進化を体感。Claude Code では `AskUserQuestion`、Kiro では `askQuestions`（Experimental）を想定。Kiro で UI が出ない場合は簡易実装で代替可とする。
+### Phase 5: 前半の検証
 
-### Phase 5: 改善版で再実行
+- `/plugin marketplace list` に `anthropic-agent-skills` がある
+- `/plugin list` に `skill-creator@anthropic-agent-skills` が enabled で表示
+- `.claude/skills/daily-operations-report/` が Progressive Disclosure 構造で保存されている
+- `AskUserQuestion` による対話確認が組み込まれている
+- `claude-code-guide` を 1 回以上呼び出して仕様調査している
+- Phase 1.7 で対話確認ツールを直接呼び UI を目視確認している
 
-- 同じプロンプトで再生成し、出力品質の向上を確認
-- 対象日を省略したプロンプト、既存日付のプロンプトで対話確認 UI が出ることを確認
+### Phase 6: gh skill で外部スキル管理
 
-## skills-lock.json の扱い
+| 確認項目                        | 使用コマンド                                                                      |
+| ------------------------------- | --------------------------------------------------------------------------------- |
+| 他スキルを pin 付きインストール | `gh skill install anthropics/skills mcp-builder --agent claude-code --pin <タグ>` |
+| インストール済み一覧            | `gh skill list`                                                                   |
+| 更新                            | `gh skill update --all`                                                           |
+| 削除                            | `gh skill uninstall <owner>/<repo> <skill>`                                       |
 
-- `source`, `sourceType`, `computedHash` を記録
-- **改ざん検知には使えない**（`skills add` / `experimental_install` は既存ハッシュを検証せずサイレント上書きする）
-- コミット対象とし、改ざん検知は git diff による PR レビューで担保
+**ねらい**: 非公式 GitHub リポジトリや、公式マケプレに無いスキルを pin 固定で導入する手順を体験。
 
-## 検証
+### Phase 7: まとめ
 
-- `package.json` の `skills` が exact / `^` でピン留めされていること
-- `.npmrc` に `minimum-release-age=30240` が記載
-- `pnpm-lock.yaml` に `skills` の `resolution.integrity: sha512-...` がある
-- `skills-lock.json` に `source: "anthropics/skills"` と `computedHash` が記録されている
-- `.claude/skills/skill-creator/SKILL.md` または `.kiro/skills/skill-creator/SKILL.md` が配置されている
+- **第一選択は Claude Code 公式マケプレ**
+- サードパーティ GitHub スキルは `gh skill` で pin 導入
+
+## 検証項目（章全体）
+
+- `.claude/skills/skill-creator/SKILL.md` が公式マケプレ経由で配置されている
 - 自作 `daily-operations-report` が Progressive Disclosure を活用した構造で保存されている
 - `daily-operations-report` に対話確認（AskUserQuestion / askQuestions 相当）が組み込まれている
 - Claude Code 版では `claude-code-guide` を 1 回以上呼び出して仕様調査している
 - Phase 1.7 で対話確認ツールを直接呼び、選択肢 UI を目視で確認している
+- （後半）`gh skill` で外部スキルの導入手順を実行している
