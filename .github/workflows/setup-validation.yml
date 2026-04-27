@@ -76,8 +76,7 @@ jobs:
           else
             PNPM_HOME="$HOME/.local/share/pnpm"
           fi
-          rm -rf "$PNPM_HOME"
-          # Remove any pnpm binary found in PATH
+          rm -rf "$PNPM_HOME" "$HOME/.config/pnpm" "$HOME/.cache/pnpm" "$HOME/.local/state/pnpm"
           while command -v pnpm >/dev/null 2>&1; do
             P="$(command -v pnpm)"
             echo "Removing $P"
@@ -92,18 +91,20 @@ jobs:
           else
             PNPM_HOME="$HOME/.local/share/pnpm"
           fi
-          # Ensure the pinned binary is reachable as `pnpm`
-          PINNED="$PNPM_HOME/.tools/pnpm-exe/10.33.2/pnpm"
-          if [ -x "$PINNED" ] && [ ! -e "$PNPM_HOME/pnpm" ]; then
-            ln -sf "$PINNED" "$PNPM_HOME/pnpm"
-          fi
-          echo "--- $PNPM_HOME contents ---"
-          ls -la "$PNPM_HOME" || true
+          echo "--- find $PNPM_HOME ---"
+          find "$PNPM_HOME" -maxdepth 4 -ls || true
+          echo "--- pinned binary version ---"
+          "$PNPM_HOME/.tools/pnpm-exe/10.33.2/pnpm" --version || true
+          echo "--- shim version (if exists) ---"
+          [ -e "$PNPM_HOME/pnpm" ] && "$PNPM_HOME/pnpm" --version || echo "(no shim at \$PNPM_HOME/pnpm)"
+          # Force shim to point to pinned binary
+          ln -sf "$PNPM_HOME/.tools/pnpm-exe/10.33.2/pnpm" "$PNPM_HOME/pnpm"
           echo "PNPM_HOME=$PNPM_HOME" >> "$GITHUB_ENV"
           echo "$PNPM_HOME" >> "$GITHUB_PATH"
       - name: §7 Verify pnpm (must be 10.33.2)
         run: |
           which -a pnpm
+          ls -la "$PNPM_HOME/pnpm" || true
           pnpm --version
           test "$(pnpm --version)" = "10.33.2"
 
