@@ -54,14 +54,28 @@ jobs:
           sqlite3 --version
           sqlite3 ":memory:" "CREATE TABLE test(id INTEGER, name TEXT); INSERT INTO test VALUES(1, 'hello'); SELECT * FROM test;"
 
-      - name: §6 Install spec-kit
+      - name: §6 Install AWS CLI
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            brew install awscli || brew upgrade awscli
+          else
+            curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+            unzip -q /tmp/awscliv2.zip -d /tmp
+            sudo /tmp/aws/install --update
+          fi
+      - name: §6 Verify aws (must be v2.x)
+        run: |
+          aws --version
+          aws --version 2>&1 | grep -E "^aws-cli/2\."
+
+      - name: §7 Install spec-kit
         run: uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v0.8.0
-      - name: §6 Verify specify (must be v0.8.0)
+      - name: §7 Verify specify (must be v0.8.0)
         run: |
           specify --version
           specify --version | grep -q "0\.8\.0"
 
-      - name: §7 Install pnpm
+      - name: §8 Install pnpm
         run: |
           curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=10.33.2 sh -
           if [ "$RUNNER_OS" = "macOS" ]; then
@@ -71,22 +85,22 @@ jobs:
           fi
           echo "PNPM_HOME=$PNPM_HOME" >> "$GITHUB_ENV"
           echo "$PNPM_HOME" >> "$GITHUB_PATH"
-      - name: §7 Verify pnpm (must be 10.33.2)
+      - name: §8 Verify pnpm (must be 10.33.2)
         run: |
           pnpm --version
           test "$(pnpm --version)" = "10.33.2"
 
-      - name: §8 Install playwright-cli
+      - name: §9 Install playwright-cli
         run: pnpm add -g "@playwright/cli@0.1.1" playwright
-      - name: §8 Verify @playwright/cli (must be 0.1.1)
+      - name: §9 Verify @playwright/cli (must be 0.1.1)
         run: |
           pnpm list -g --depth 0
           pnpm list -g --depth 0 2>&1 | grep -F "@playwright/cli@0.1.1"
 
-      - name: §9 Install gh CLI (macOS, brew)
+      - name: §10 Install gh CLI (macOS, brew)
         if: runner.os == 'macOS'
         run: brew install gh || brew upgrade gh
-      - name: §9 Verify gh (macOS)
+      - name: §10 Verify gh (macOS)
         if: runner.os == 'macOS'
         run: gh --version
 
@@ -134,33 +148,39 @@ jobs:
         continue-on-error: true
         run: sqlite3 --version
 
-      - name: §6 Install spec-kit
+      - name: §6 Verify aws (must be v2.x; pre-installed on runner)
+        shell: pwsh
+        run: |
+          aws --version
+          if (-not ((aws --version 2>&1 | Out-String) -match "aws-cli/2\.")) { throw "aws-cli not v2" }
+
+      - name: §7 Install spec-kit
         run: uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v0.8.0
-      - name: §6 Verify specify (must be v0.8.0)
+      - name: §7 Verify specify (must be v0.8.0)
         shell: pwsh
         run: |
           specify --version
           if (-not ((specify --version) -match "0\.8\.0")) { throw "specify version mismatch" }
 
-      - name: §7 Install pnpm
+      - name: §8 Install pnpm
         shell: pwsh
         run: |
           $env:PNPM_VERSION = '10.33.2'
           Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
-      - name: §7 Verify pnpm (must be 10.33.2)
+      - name: §8 Verify pnpm (must be 10.33.2)
         shell: pwsh
         run: |
           pnpm --version
           if ((pnpm --version).Trim() -ne "10.33.2") { throw "pnpm version mismatch" }
 
-      - name: §8 Install playwright-cli
+      - name: §9 Install playwright-cli
         run: pnpm add -g "@playwright/cli@0.1.1" playwright
-      - name: §8 Verify @playwright/cli (must be 0.1.1)
+      - name: §9 Verify @playwright/cli (must be 0.1.1)
         shell: pwsh
         run: |
           pnpm list -g --depth 0
           $out = pnpm list -g --depth 0 2>&1 | Out-String
           if ($out -notmatch "@playwright/cli@0\.1\.1") { throw "@playwright/cli version mismatch" }
 
-      - name: §9 Verify gh (pre-installed on runner)
+      - name: §10 Verify gh (pre-installed on runner)
         run: gh --version

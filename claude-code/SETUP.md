@@ -19,6 +19,7 @@
 | [uv](https://docs.astral.sh/uv/)                                      | 0.11       | Astral                     | 全章: Pythonパッケージ管理・タスク実行       |
 | [Claude Code](https://docs.claude.com/en/docs/claude-code/quickstart) | 2.1.119    | Anthropic                  | 全章: AIコーディングエージェント             |
 | [SQLite3](https://www.sqlite.org/)                                    | 3.x        | SQLite Consortium          | 全章: DBレコード確認                         |
+| [AWS CLI](https://aws.amazon.com/cli/)                                | 2.x        | AWS                        | 全章: AWS リソース操作                       |
 | [spec-kit](https://github.com/github/spec-kit)                        | 0.8.0      | GitHub                     | ch1: Spec駆動スキル導入                      |
 | [Node.js](https://nodejs.org/)                                        | 22         | OpenJS Foundation          | ch3-playwright: playwright CLI の実行        |
 | [pnpm](https://pnpm.io/)                                              | 10.33.2    | pnpm                       | ch3-playwright: Node パッケージマネージャ    |
@@ -139,7 +140,42 @@ winget install -e --id SQLite.SQLite
 
 </details>
 
-### 6. spec-kit
+### 6. AWS CLI
+
+AWS CLI v2 系をインストールします（v1 は EOL 済み）。最新の 2.x で問題ありません。
+
+```bash
+# macOS (Homebrew)
+brew install awscli
+```
+
+<details>
+<summary>Windows (CMD / PowerShell)</summary>
+
+```powershell
+winget install -e --id Amazon.AWSCLI
+```
+
+</details>
+
+<details>
+<summary>Linux (公式インストーラ)</summary>
+
+```bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm -rf awscliv2.zip aws
+```
+
+</details>
+
+```bash
+aws --version
+# aws-cli/2.x.x ... と表示されればOK
+```
+
+### 7. spec-kit
 
 2026-04-23 リリースの `v0.8.0` を pin して `specify` CLI を `uv tool` で永続インストールします。
 
@@ -153,7 +189,7 @@ uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v0
 specify --version
 ```
 
-### 7. pnpm
+### 8. pnpm
 
 2026-04-23 リリースの `10.33.2` を pin して公式スタンドアロンスクリプトでインストールします（pnpm 10 は `manage-package-manager-versions` で自己管理するため Corepack 不要）。
 
@@ -178,7 +214,7 @@ pnpm --version
 # 10.33.2 と表示されればOK
 ```
 
-### 8. playwright-cli
+### 9. playwright-cli
 
 `playwright-cli` コマンドを提供する `@playwright/cli` と、ブラウザ／ffmpeg バイナリのインストーラを提供する `playwright` を pnpm でグローバルインストールします。
 
@@ -204,7 +240,7 @@ playwright install ffmpeg
 playwright-cli --version
 ```
 
-### 9. GitHub CLI
+### 10. GitHub CLI
 
 `gh skill` サブコマンドは Public Preview のため仕様変更の可能性があります。gh 本体を最新化します。
 
