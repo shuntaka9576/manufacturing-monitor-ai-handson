@@ -51,6 +51,7 @@
     "showlegend",
     "streamlit",
     "textlint",
+    "textlintrc",
     "timespec",
     "tobytes",
     "winget"

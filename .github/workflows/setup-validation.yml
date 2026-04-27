@@ -1,0 +1,134 @@
+name: SETUP validation
+
+on:
+  pull_request:
+    paths:
+      - SETUP.claude.md
+      - .github/workflows/setup-validation.yml
+  push:
+    branches: [main]
+    paths:
+      - SETUP.claude.md
+      - .github/workflows/setup-validation.yml
+  workflow_dispatch:
+
+jobs:
+  unix:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: §1 Python --version (require 3.12+)
+        run: python3 --version
+
+      - name: §2 Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/0.11.3/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: §2 Verify uv
+        run: uv --version
+
+      - name: §3 Install Node.js (macOS, brew)
+        if: runner.os == 'macOS'
+        run: brew install node || brew upgrade node
+      - name: §3 Verify Node.js (macOS)
+        if: runner.os == 'macOS'
+        run: node --version
+
+      - name: §4 Install Claude Code
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: §4 Verify claude
+        run: claude --version
+
+      - name: §5 SQLite3 verification
+        run: |
+          sqlite3 --version
+          sqlite3 ":memory:" "CREATE TABLE test(id INTEGER, name TEXT); INSERT INTO test VALUES(1, 'hello'); SELECT * FROM test;"
+
+      - name: §6 Install spec-kit
+        run: uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v0.8.0
+      - name: §6 Verify specify
+        run: specify --version
+
+      - name: §7 Install pnpm
+        run: |
+          curl -fsSL https://get.pnpm.io/install.sh | sh -
+          echo "$HOME/.local/share/pnpm" >> "$GITHUB_PATH"
+      - name: §7 Verify pnpm
+        run: pnpm --version
+
+      - name: §8 Install playwright-cli
+        run: pnpm add -g "@playwright/cli@0.1.1" playwright
+      - name: §8 Verify playwright-cli
+        run: playwright-cli --version
+
+      - name: §9 Install gh CLI (macOS, brew)
+        if: runner.os == 'macOS'
+        run: brew install gh || brew upgrade gh
+      - name: §9 Verify gh (macOS)
+        if: runner.os == 'macOS'
+        run: gh --version
+
+  windows:
+    name: windows-${{ matrix.shell }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [cmd, pwsh]
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pre-add common install dirs to GITHUB_PATH
+        shell: pwsh
+        run: |
+          Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.local\bin"
+          Add-Content -Path $env:GITHUB_PATH -Value "$env:LOCALAPPDATA\pnpm"
+
+      - name: §1 Python --version
+        run: python --version
+
+      - name: §2 Install uv
+        run: powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/0.11.3/install.ps1 | iex"
+      - name: §2 Verify uv
+        run: uv --version
+
+      - name: §3 Verify Node.js (pre-installed on runner)
+        run: node --version
+
+      - name: §4 Install Claude Code
+        run: powershell -Command "irm https://claude.ai/install.ps1 | iex"
+      - name: §4 Verify claude
+        run: claude --version
+
+      - name: §5 SQLite3 --version (pre-installed on runner)
+        continue-on-error: true
+        run: sqlite3 --version
+
+      - name: §6 Install spec-kit
+        run: uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v0.8.0
+      - name: §6 Verify specify
+        run: specify --version
+
+      - name: §7 Install pnpm
+        run: powershell -Command "Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression"
+      - name: §7 Verify pnpm
+        run: pnpm --version
+
+      - name: §8 Install playwright-cli
+        run: pnpm add -g "@playwright/cli@0.1.1" playwright
+      - name: §8 Verify playwright-cli
+        run: playwright-cli --version
+
+      - name: §9 Verify gh (pre-installed on runner)
+        run: gh --version
