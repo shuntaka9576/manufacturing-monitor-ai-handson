@@ -142,7 +142,7 @@ node --version
 Node.jsインストール後に以下を実行します。
 
 ```powershell
-npm install -g @playwright/cli@0.1.1
+npm install -g @playwright/cli@0.1.9
 ```
 
 ブラウザバイナリをインストールします。

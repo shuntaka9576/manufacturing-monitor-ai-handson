@@ -17,6 +17,8 @@
     "AUTOINCREMENT",
     "agentskills",
     "anthropics",
+    "awscli",
+    "awscliv",
     "bfloat",
     "capsys",
     "dataframe",
