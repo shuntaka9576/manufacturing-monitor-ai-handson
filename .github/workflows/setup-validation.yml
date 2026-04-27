@@ -61,6 +61,14 @@ jobs:
           specify --version
           specify --version | grep -q "0\.8\.0"
 
+      - name: §7 Diagnose pre-existing pnpm
+        run: |
+          echo "--- which -a pnpm ---"
+          which -a pnpm || true
+          echo "--- pnpm --version (pre) ---"
+          pnpm --version || true
+          echo "--- realpath of pnpm ---"
+          readlink -f "$(command -v pnpm)" 2>/dev/null || true
       - name: §7 Cleanup pre-existing pnpm
         run: |
           if [ "$RUNNER_OS" = "macOS" ]; then
@@ -69,8 +77,13 @@ jobs:
             PNPM_HOME="$HOME/.local/share/pnpm"
           fi
           rm -rf "$PNPM_HOME"
-          sudo rm -f /usr/local/bin/pnpm 2>/dev/null || true
-          hash -r 2>/dev/null || true
+          # Remove any pnpm binary found in PATH
+          while command -v pnpm >/dev/null 2>&1; do
+            P="$(command -v pnpm)"
+            echo "Removing $P"
+            sudo rm -f "$P" || rm -f "$P" || break
+            hash -r 2>/dev/null || true
+          done
       - name: §7 Install pnpm
         run: |
           curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=10.33.2 sh -
@@ -79,10 +92,18 @@ jobs:
           else
             PNPM_HOME="$HOME/.local/share/pnpm"
           fi
+          # Ensure the pinned binary is reachable as `pnpm`
+          PINNED="$PNPM_HOME/.tools/pnpm-exe/10.33.2/pnpm"
+          if [ -x "$PINNED" ] && [ ! -e "$PNPM_HOME/pnpm" ]; then
+            ln -sf "$PINNED" "$PNPM_HOME/pnpm"
+          fi
+          echo "--- $PNPM_HOME contents ---"
+          ls -la "$PNPM_HOME" || true
           echo "PNPM_HOME=$PNPM_HOME" >> "$GITHUB_ENV"
           echo "$PNPM_HOME" >> "$GITHUB_PATH"
       - name: §7 Verify pnpm (must be 10.33.2)
         run: |
+          which -a pnpm
           pnpm --version
           test "$(pnpm --version)" = "10.33.2"
 
@@ -152,17 +173,37 @@ jobs:
           specify --version
           if (-not ((specify --version) -match "0\.8\.0")) { throw "specify version mismatch" }
 
+      - name: §7 Diagnose pre-existing pnpm
+        shell: pwsh
+        run: |
+          Get-Command pnpm -All -ErrorAction SilentlyContinue | Format-Table -AutoSize
+          pnpm --version
       - name: §7 Cleanup pre-existing pnpm
         shell: pwsh
-        run: Remove-Item -Recurse -Force "$env:LOCALAPPDATA\pnpm" -ErrorAction SilentlyContinue
+        run: |
+          Remove-Item -Recurse -Force "$env:LOCALAPPDATA\pnpm" -ErrorAction SilentlyContinue
+          # Remove any pnpm/pnpm.exe found in PATH
+          while ($cmd = Get-Command pnpm -ErrorAction SilentlyContinue) {
+            Write-Host "Removing $($cmd.Source)"
+            Remove-Item -Force $cmd.Source -ErrorAction SilentlyContinue
+            if (Test-Path $cmd.Source) { break }
+          }
       - name: §7 Install pnpm
         shell: pwsh
         run: |
           $env:PNPM_VERSION = '10.33.2'
           Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
+          $PinnedDir = "$env:LOCALAPPDATA\pnpm\.tools\pnpm-exe\10.33.2"
+          $PinnedExe = "$PinnedDir\pnpm.exe"
+          $ShimPath = "$env:LOCALAPPDATA\pnpm\pnpm.exe"
+          if ((Test-Path $PinnedExe) -and (-not (Test-Path $ShimPath))) {
+            Copy-Item $PinnedExe $ShimPath
+          }
+          Get-ChildItem "$env:LOCALAPPDATA\pnpm" | Format-Table -AutoSize
       - name: §7 Verify pnpm (must be 10.33.2)
         shell: pwsh
         run: |
+          Get-Command pnpm -All -ErrorAction SilentlyContinue | Format-Table -AutoSize
           pnpm --version
           if ((pnpm --version).Trim() -ne "10.33.2") { throw "pnpm version mismatch" }
 
