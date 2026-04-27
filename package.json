@@ -6,10 +6,10 @@
     "prepare": "lefthook install",
     "lint": "turbo run lint:spell lint:text lint:format",
     "lint:spell": "cspell lint --no-progress \"**\"",
-    "lint:text": "textlint README.md SETUP.md \"{ch1,ch2,ch3,ch4,ch4_fin}/README.md\"",
+    "lint:text": "textlint README.md \"kiro/{README,SETUP}.md\" claude-code/README.md \"kiro/{ch1,ch2,ch3,ch4,ch5,ch5_fin}/README.md\" \"claude-code/{ch1,ch2,ch4,ch5,ch5_fin}/README.md\"",
     "lint:format": "prettier --check \"**/*.md\"",
     "fix": "turbo run fix:text fix:format",
-    "fix:text": "textlint --fix README.md SETUP.md \"{ch1,ch2,ch3,ch4,ch4_fin}/README.md\"",
+    "fix:text": "textlint --fix README.md \"kiro/{README,SETUP}.md\" claude-code/README.md \"kiro/{ch1,ch2,ch3,ch4,ch5,ch5_fin}/README.md\" \"claude-code/{ch1,ch2,ch4,ch5,ch5_fin}/README.md\"",
     "fix:format": "prettier --write \"**/*.md\""
   },
   "packageManager": "pnpm@10.30.3",
