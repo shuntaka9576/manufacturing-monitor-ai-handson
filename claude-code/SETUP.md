@@ -23,7 +23,7 @@
 | [spec-kit](https://github.com/github/spec-kit)                        | 0.8.0      | GitHub                     | ch1: Spec駆動スキル導入                      |
 | [Node.js](https://nodejs.org/)                                        | 22         | OpenJS Foundation          | ch3-playwright: playwright CLI の実行        |
 | [pnpm](https://pnpm.io/)                                              | 10.33.2    | pnpm                       | ch3-playwright: Node パッケージマネージャ    |
-| [playwright-cli](https://github.com/microsoft/playwright-cli)         | 0.1.1      | Microsoft                  | ch3-playwright: ブラウザ自動操作             |
+| [playwright-cli](https://github.com/microsoft/playwright-cli)         | 0.1.9      | Microsoft                  | ch3-playwright: ブラウザ自動操作             |
 | [GitHub CLI](https://cli.github.com/)                                 | 2.90.0     | GitHub                     | ch3-skill-creator: `gh skill` で Skills 導入 |
 
 ## インストール手順
@@ -219,7 +219,7 @@ pnpm --version
 `playwright-cli` コマンドを提供する `@playwright/cli` と、ブラウザ／ffmpeg バイナリのインストーラを提供する `playwright` を pnpm でグローバルインストールします。
 
 ```bash
-pnpm add -g @playwright/cli@0.1.1 playwright
+pnpm add -g @playwright/cli@0.1.9 playwright
 ```
 
 ブラウザバイナリをインストールします。
@@ -297,6 +297,6 @@ gh auth status
 ハンズオン中に OSS / npm パッケージを取り込む箇所では、以下の方針で版を固定し、リリース直後の悪性パッケージ取り込みを避けます。
 
 - **Python ライブラリ**: 各チャプターの `uv.lock` に検証済みバージョンを記録。受講者は `uv sync` で同じ状態を再現できます
-- **npm 経由ツール（playwright-cli 等）**: `@0.1.1` のように **バージョン pin** してインストール
+- **npm 経由ツール（playwright-cli 等）**: `@0.1.9` のように **バージョン pin** してインストール
 - **Anthropic 公式プラグイン（ch3-skill-creator）**: Claude Code 公式マーケットプレイス経由で `/plugin marketplace add anthropics/skills` を登録し、`/plugin install skill-creator@anthropic-agent-skills` で取り込みます。配布元は Anthropic 公式リポジトリ（`anthropics/skills`）に限定され、必要に応じて `anthropics/skills#v1.0.0` のようにタグ指定でバージョン pin 可能です
 - **ベースツール（Python / uv / Node.js / SQLite3 / GitHub CLI / Claude Code）**: 各プロジェクト公式のインストーラ／パッケージマネージャ経由のみを案内（環境差を避けるため厳密な pin は行いません）

@@ -91,11 +91,11 @@ jobs:
           test "$(pnpm --version)" = "10.33.2"
 
       - name: §9 Install playwright-cli
-        run: pnpm add -g "@playwright/cli@0.1.1" playwright
-      - name: §9 Verify @playwright/cli (must be 0.1.1)
+        run: pnpm add -g "@playwright/cli@0.1.9" playwright
+      - name: §9 Verify @playwright/cli (must be 0.1.9)
         run: |
           pnpm list -g --depth 0
-          pnpm list -g --depth 0 2>&1 | grep -F "@playwright/cli@0.1.1"
+          pnpm list -g --depth 0 2>&1 | grep -F "@playwright/cli@0.1.9"
 
       - name: §10 Install gh CLI (macOS, brew)
         if: runner.os == 'macOS'
@@ -174,13 +174,13 @@ jobs:
           if ((pnpm --version).Trim() -ne "10.33.2") { throw "pnpm version mismatch" }
 
       - name: §9 Install playwright-cli
-        run: pnpm add -g "@playwright/cli@0.1.1" playwright
-      - name: §9 Verify @playwright/cli (must be 0.1.1)
+        run: pnpm add -g "@playwright/cli@0.1.9" playwright
+      - name: §9 Verify @playwright/cli (must be 0.1.9)
         shell: pwsh
         run: |
           pnpm list -g --depth 0
           $out = pnpm list -g --depth 0 2>&1 | Out-String
-          if ($out -notmatch "@playwright/cli@0\.1\.1") { throw "@playwright/cli version mismatch" }
+          if ($out -notmatch "@playwright/cli@0\.1\.9") { throw "@playwright/cli version mismatch" }
 
       - name: §10 Verify gh (pre-installed on runner)
         run: gh --version
