@@ -91,14 +91,15 @@ jobs:
           else
             PNPM_HOME="$HOME/.local/share/pnpm"
           fi
-          echo "--- find $PNPM_HOME ---"
-          find "$PNPM_HOME" -maxdepth 4 -ls || true
-          echo "--- pinned binary version ---"
-          "$PNPM_HOME/.tools/pnpm-exe/10.33.2/pnpm" --version || true
-          echo "--- shim version (if exists) ---"
-          [ -e "$PNPM_HOME/pnpm" ] && "$PNPM_HOME/pnpm" --version || echo "(no shim at \$PNPM_HOME/pnpm)"
-          # Force shim to point to pinned binary
-          ln -sf "$PNPM_HOME/.tools/pnpm-exe/10.33.2/pnpm" "$PNPM_HOME/pnpm"
+          echo "--- shim contents ---"
+          cat "$PNPM_HOME/pnpm" || true
+          echo "--- file types ---"
+          file "$PNPM_HOME/pnpm" || true
+          file "$PNPM_HOME/.tools/pnpm-exe/10.33.2/pnpm" || true
+          echo "--- direct binary with manage-pm-versions disabled ---"
+          "$PNPM_HOME/.tools/pnpm-exe/10.33.2/pnpm" --config.manage-package-manager-versions=false --version || true
+          echo "--- direct binary in tmp dir (no project context) ---"
+          ( cd /tmp && "$PNPM_HOME/.tools/pnpm-exe/10.33.2/pnpm" --version ) || true
           echo "PNPM_HOME=$PNPM_HOME" >> "$GITHUB_ENV"
           echo "$PNPM_HOME" >> "$GITHUB_PATH"
       - name: §7 Verify pnpm (must be 10.33.2)
