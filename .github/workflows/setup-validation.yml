@@ -59,7 +59,7 @@ jobs:
 
       - name: §7 Install pnpm
         run: |
-          curl -fsSL https://get.pnpm.io/install.sh | sh -
+          curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=10.33.2 sh -
           if [ "$RUNNER_OS" = "macOS" ]; then
             PNPM_HOME="$HOME/Library/pnpm"
           else
@@ -67,8 +67,10 @@ jobs:
           fi
           echo "PNPM_HOME=$PNPM_HOME" >> "$GITHUB_ENV"
           echo "$PNPM_HOME" >> "$GITHUB_PATH"
-      - name: §7 Verify pnpm
-        run: pnpm --version
+      - name: §7 Verify pnpm (must be 10.33.2)
+        run: |
+          pnpm --version
+          test "$(pnpm --version)" = "10.33.2"
 
       - name: §8 Install playwright-cli
         run: pnpm add -g "@playwright/cli@0.1.1" playwright
@@ -128,9 +130,12 @@ jobs:
         run: specify --version
 
       - name: §7 Install pnpm
-        run: powershell -Command "Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression"
-      - name: §7 Verify pnpm
-        run: pnpm --version
+        run: powershell -Command "$env:PNPM_VERSION='10.33.2'; Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression"
+      - name: §7 Verify pnpm (must be 10.33.2)
+        shell: pwsh
+        run: |
+          pnpm --version
+          if ((pnpm --version).Trim() -ne "10.33.2") { throw "pnpm version mismatch" }
 
       - name: §8 Install playwright-cli
         run: pnpm add -g "@playwright/cli@0.1.1" playwright
