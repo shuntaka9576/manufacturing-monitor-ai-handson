@@ -1,0 +1,8 @@
+# spec-kit が機能ごとに生成する成果物（参加者が各自生成する）
+specs/
+
+# seed.py で生成される DB ファイル
+data/
+
+# Claude Code のローカル設定（認証情報を含む可能性）
+.claude/settings.local.json
