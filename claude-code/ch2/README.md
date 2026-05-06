@@ -70,9 +70,26 @@ claude
 > [!NOTE]
 > **画像入力の実務的な位置づけ**
 >
-> 実務ではFigma MCP連携でデザインデータを直接AIに渡す方法が理想的です。コンポーネント名・カラーコード・レイアウト構造などのメタ情報をそのまま活用できます。
-> 画像入力ではこれらのメタ情報が欠落し、解像度や手描き度合いによって認識精度にばらつきが出る欠点があります。
-> ただしPoCや社内ツール開発では画像で十分回せます。
+> 実務では Figma MCP 連携でデザインデータを直接 AI に渡す方法が理想です。**Code Connect** で Figma コンポーネントと実装を 1:1 マッピングしておくと、AI は既存の `<Button variant="primary">` のような API に沿ってコード生成します。色も `color/primary/500` のようなデザイントークン名で取得され、hex 直書きを避けられます。2026 年以降はコード → Figma の書き戻しも可能で、双方向 round-trip が成立します。
+>
+> 一方で、Figma MCP の効果は **Figma 側の整理具合に強く依存** します。コンポーネント化されていない、命名が `Frame1268` のまま、variants が未定義、トークン未適用、といったファイルでは AI への入力品質は画像と大差なくなります。デザインシステムやコンポーネントライブラリが未整備の段階では、連携の旨味は限定的です。
+>
+> 画像入力ではメタ情報が欠落し、解像度や手描き度合いで認識精度にばらつきが出ます。ただし PoC や社内ツール、デザインシステム未整備の案件では画像で十分回せます。
+>
+> <details>
+> <summary>UI 仕様はどこに置くべきか（SSoT の議論）</summary>
+>
+> 「Figma / Storybook / マークダウンのどれを単一の真実の源（SSoT）にするか」は結論の出ていない議論です。
+>
+> - **Figma**: ビジュアル確認・反復に最適。デザイナーが主役
+> - **Storybook**: 動くコンポーネント。実装と乖離しにくいが、非エンジニアの編集が難しい
+> - **マークダウン（design.md / RFC）**: AI エージェントに読ませるのに最適。ルール・トークン・命名を明示できる
+>
+> 実務的にはどれか一つに寄せず、**Figma（ビジュアル）+ Storybook（動く実装）+ マークダウン（AI 向けルール）+ デザイントークン JSON** の多層構成で補完しあうのが現実解です。Figma MCP や Code Connect は、この多層を AI が一気通貫で参照する橋渡し役にあたります。
+>
+> 本ハンズオン ch2 は Streamlit 上の小規模 UI に絞るため、UI 仕様を `docs/implement-snapshot/dashboard-spec.md` に集約します。小規模・短命なツール向けの割り切りで、本格的なフロントエンドプロダクトでは上記の多層構成を取るのが一般的です。
+>
+> </details>
 
 ![img](dashboard.png)
 
@@ -80,7 +97,7 @@ claude
 
 ```text
 @dashboard.png は製造設備モニタリングダッシュボードの完成イメージです。
-この画像を分析して、UI仕様を `.claude/rules/dashboard-spec.md` に作成してください。
+この画像を分析して、UI仕様を `docs/implement-snapshot/dashboard-spec.md` に作成してください。
 
 仕様には以下を含めてください。
 - ページ構成とファイル配置
@@ -95,12 +112,12 @@ claude
 `Shift+Tab` で通常モードに戻し、以下を入力します。
 
 ```text
-計画に沿って `.claude/rules/dashboard-spec.md` を作成してください。
+計画に沿って `docs/implement-snapshot/dashboard-spec.md` を作成してください。
 ```
 
 #### チェック項目
 
-- [ ] `.claude/rules/dashboard-spec.md` が作成されていることを確認してください
+- [ ] `docs/implement-snapshot/dashboard-spec.md` が作成されていることを確認してください
 - [ ] 仕様にゲージチャート・時系列チャート・ステータス変更履歴の仕様が含まれていることを確認してください
 
 仕様に不足や問題があれば、この時点で修正を依頼してください。
@@ -118,7 +135,7 @@ claude
 > コンテキストの圧縮が起きるようなロングランの実装では、最初に立てたプランがコンテキストウィンドウから失われ、実装計画や受け入れ条件を忘れてしまいます。ファイルとして外部化しておけばAIはいつでも読み直せるため、長い実装でも一貫性を保てます。
 
 ```text
-`.claude/rules/dashboard-spec.md` の UI 仕様に従い、実装計画を `plan/dashboard-tasks.md` に作成してください。
+`docs/implement-snapshot/dashboard-spec.md` の UI 仕様に従い、実装計画を `docs/implement-snapshot/dashboard-tasks.md` に作成してください。
 
 計画には以下を含めてください。
 - 作成するファイルの一覧と役割
@@ -133,12 +150,12 @@ claude
 `Shift+Tab` で通常モードに戻し、計画ファイルを作成させます。
 
 ```text
-計画に沿って `plan/dashboard-tasks.md` を作成してください。
+計画に沿って `docs/implement-snapshot/dashboard-tasks.md` を作成してください。
 ```
 
 #### チェック項目
 
-- [ ] `plan/dashboard-tasks.md` が作成されていることを確認してください
+- [ ] `docs/implement-snapshot/dashboard-tasks.md` が作成されていることを確認してください
 - [ ] タスクの粒度と実装順序が妥当であることを確認してください
 
 ### 2.3. 計画に沿って実装を実行する
@@ -152,7 +169,7 @@ claude
 以下のプロンプトで実装を開始します。AIが生成する計画のフェーズ分割は毎回異なる場合があります。フェーズ数や粒度が異なっても問題ありません。
 
 ```text
-`plan/dashboard-tasks.md` の計画に沿って、ダッシュボードを実装してください。
+`docs/implement-snapshot/dashboard-tasks.md` の計画に沿って、ダッシュボードを実装してください。
 まずはフェーズ1を実装してください。動作確認方法を教えてください。
 
 その後確認して問題ない場合、完了したタスクにはチェックを入れて進捗を管理してください。
