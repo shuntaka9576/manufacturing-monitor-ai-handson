@@ -14,7 +14,7 @@ Excelファイル（`sample_data.xlsx`）が用意されています。こちら
 
 ## 体験すること（約10分｜経過 約10分）
 
-Claude Code に **[spec-kit](https://github.com/github/spec-kit)** を組み込み、Spec駆動ワークフロー（`/specify` → `/plan` → `/tasks` → `/implement`）で製造設備モニタリングダッシュボードのデータ基盤を構築します。Excel解析結果を `CLAUDE.md` などプロジェクト知識に登録してから Spec を生成する流れを体験します。
+Claude Code に **[spec-kit](https://github.com/github/spec-kit)** を組み込み、Spec駆動ワークフロー（`/speckit.constitution` → `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`）で製造設備モニタリングダッシュボードのデータ基盤を構築します。Excel解析結果を `CLAUDE.md` などプロジェクト知識に登録してから Spec を生成する流れを体験します。
 
 ### Spec駆動開発とは
 
@@ -73,12 +73,6 @@ cd ch1
 claude
 ```
 
-モデルを Opus に切り替えておきます（仕様生成はクレジットを使うが品質を優先）。
-
-```text
-/model opus
-```
-
 ## 1. Excelの内容を解析して知識に登録する（約10分｜経過 約10分）
 
 ### 1.1. エクセル解析プロンプトを入力
@@ -123,89 +117,147 @@ claude
 
 ### 2.1. spec-kit を導入する
 
-Claude Code を一度終了し、ch1 ディレクトリで spec-kit を初期化します。
+Claude Code を一度終了し、ch1 ディレクトリで spec-kit を初期化します。バージョンは `v0.8.5` で固定し、ハンズオン中の挙動を揃えます。
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init --here --ai claude
+uvx --from git+https://github.com/github/spec-kit.git@v0.8.5 specify init --here --integration claude
 ```
 
-`.specify/` と `.claude/commands/` 配下に `/specify` `/plan` `/tasks` `/implement` などのスラッシュコマンドが追加されます。
+`.specify/` と `.claude/commands/` 配下に `/speckit.constitution` `/speckit.specify` `/speckit.clarify` `/speckit.plan` `/speckit.tasks` `/speckit.implement` などのスラッシュコマンドが追加されます。
+
+> [!NOTE]
+> エージェント指定は現行の `--integration claude` を使います。旧 `--ai claude` は deprecated で v0.10.0 以降は廃止予定です。
 
 ```bash
 claude
 ```
 
-Claude Code を再起動し、`/help` でコマンド一覧に `/specify` が現れていれば OK です。
+Claude Code を再起動し、`/help` でコマンド一覧に `/speckit.specify` が現れていれば OK です。
 
-### 2.2. Requirements: `/specify` で要件定義
+### 2.2. Constitution: `/speckit.constitution` でプロジェクト原則を定義
 
-以下のプロンプトをスラッシュコマンドとして入力します。
+`/speckit.specify` の前に、プロジェクト全体で守りたい原則を `.specify/memory/constitution.md` に書き出します。spec-kit が以降のステップでこのファイルを参照し、原則からの逸脱を抑制します。
 
 ```text
-/specify
-エクセルをインプットに、データを投入する seed.py を作成します。
-seed.py にハードコードされたデータ定数は一切持たせず、全てのデータをExcelから読み込んでください。
-Excelのシート構造の詳細は CLAUDE.md の「sample_data.xlsx のシート仕様」を参照してください。
+/speckit.constitution
+このプロジェクトは Spec 駆動開発のハンズオン教材です。以下の原則を守ってください。
 
-## 作りたいもの
+- ハードコードされたデータ定数を持ち込まない。データソースは Excel (sample_data.xlsx) のみ。
+- スキーマや仕様の根拠は CLAUDE.md「sample_data.xlsx のシート仕様」に従う。
+- spec は WHAT/WHY、plan は HOW、と役割を分ける。
+- 投入後の検証手順を必ず添える。
+```
 
-製造設備の稼働状況をリアルタイムで監視するダッシュボードアプリのデータ基盤です。シードスクリプトで初期データを投入します。
+#### チェック項目
 
-## 技術スタック
+- [ ] `.specify/memory/constitution.md` が作成され、原則が反映されていること
 
-- Python 3.12以上
-- SQLite（ファイルベースDB）
+### 2.3. Requirements: `/speckit.specify` で要件定義
 
-## specに含めてほしい内容
+`/speckit.specify` は **WHAT（何を作るか）と WHY（なぜ作るか）** のみを記述するステップです。技術スタックやディレクトリ構成といった HOW は次の `/speckit.plan` に委ねます。
 
-1. ディレクトリ構成
-2. DBスキーマ定義 — Excelのデータ構造をもとにCREATE TABLE文を設計
-3. シードデータ投入ロジック
-4. 検証方法 — 動作確認コマンド
+```text
+/speckit.specify
+製造設備の稼働状況をリアルタイムで監視するダッシュボードアプリのデータ基盤を作ります。
+sample_data.xlsx を唯一のデータソースとして、初期データを投入する seed スクリプトを生成したい。
+
+## 背景・目的
+
+- 工場の設備マスタ・センサー時系列・ステータス変更履歴を一元的に保持し、後続のダッシュボードから参照できる状態にする
+- マスタや時系列データはすべて Excel から取り込む。スクリプト内にデータ定数をハードコードしない（運用で Excel を差し替えれば再投入できる状態にする）
+
+## 扱うデータ
+
+Excel のシート構成・カラム・件数の詳細は CLAUDE.md「sample_data.xlsx のシート仕様」を参照してください。
+
+- 設備マスタ
+- センサー時系列データ
+- ステータス変更履歴
+
+## 受け入れ条件（WHAT）
+
+- 3 種のテーブルに Excel の全件が投入されること
+- 設備マスタの現在ステータスが、ステータス変更履歴の最新エントリと整合すること
+- スクリプトを再実行してもデータが破損せず初期状態を再現できること
+- 投入結果を確認するための検証手順が定義されていること
+
+技術スタック・ディレクトリ構成・DDL の詳細はこの段階では決めず、/speckit.plan で扱います。
 ```
 
 実行すると `specs/NNN-*/spec.md` が作成されます。内容をレビューしてください。
 
+> [!NOTE]
+> spec-kit 公式ガイドでは `/speckit.specify` で「Do not focus on the tech stack at this point」とされています。WHAT/WHY と HOW を明確に分離するのが Spec 駆動の肝です。
+
 #### チェック項目
 
 - [ ] `specs/*/spec.md` が作成されていること
-- [ ] seed.py や data/factory.db に相当する成果物が記述されていること
-- [ ] テーブル3つ（設備マスタ・センサー時系列・ステータス変更履歴）が含まれていること
+- [ ] `spec.md` に **技術スタック節（Python / SQLite 等）が含まれていない**こと
+- [ ] 「Excel を唯一のデータソースとし、ハードコードを排する」という非機能要件が反映されていること
+- [ ] 設備マスタ・センサー時系列・ステータス変更履歴の3種データが扱われていること
 
-### 2.3. Design: `/plan` で技術設計
+### 2.4. Clarify: `/speckit.clarify` で曖昧性を解消（任意）
+
+時間に余裕があれば実行します。`spec.md` の `NEEDS CLARIFICATION` を質問形式で対話的に埋め、`/speckit.plan` 時の手戻りを減らせます。
 
 ```text
-/plan
-Python 3.12 / SQLite / openpyxl を使う前提で設計してください。
-data/ 配下に factory.db を生成し、db/ 配下に schema.sql と seed.py を配置してください。
+/speckit.clarify
 ```
 
-`specs/*/plan.md`（もしくは `design.md`）が生成されます。
+> [!TIP]
+> 受講中はスキップしても先に進めますが、本番開発では `/speckit.plan` の前に通すのが推奨フローです。
+
+### 2.5. Design: `/speckit.plan` で技術設計
+
+ここから HOW を指示します。`/speckit.specify` から外した技術スタック・配置・DDL 設計をまとめて渡します。
+
+```text
+/speckit.plan
+技術スタックは Python 3.12 / SQLite / openpyxl を使用してください。
+
+## ディレクトリ構成
+
+- data/factory.db （生成物。.gitignore 対象）
+- db/schema.sql （DDL）
+- db/seed.py （Excel 読み込み + INSERT）
+- db/connection.py （接続ヘルパー）
+
+## DBスキーマ
+
+CREATE TABLE は CLAUDE.md「sample_data.xlsx のシート仕様」のカラム・型に準拠して設計してください。equipment / sensor_readings / status_logs の3テーブルと、(equipment_id, timestamp) の複合インデックスを作成します。
+
+## 動作確認
+
+`uv sync && uv run python db/seed.py` で投入できる状態にしてください。
+```
+
+`specs/*/plan.md` が生成されます。
 
 #### チェック項目
 
 - [ ] アーキテクチャ図・モジュール分割・処理フローが妥当か確認
 - [ ] CREATE TABLE 文が CLAUDE.md のシート仕様と整合していること
+- [ ] `data/factory.db` / `db/schema.sql` / `db/seed.py` / `db/connection.py` の生成計画が含まれていること
 
-### 2.4. Tasks: `/tasks` でタスク分解
+### 2.6. Tasks: `/speckit.tasks` でタスク分解
 
 ```text
-/tasks
+/speckit.tasks
 ```
 
 `specs/*/tasks.md` が生成され、実装タスクに分解されます。
 
-### 2.5. Implement: `/implement` で実装
+### 2.7. Implement: `/speckit.implement` で実装
 
 タスク実行のクレジット消費を抑えるため、ここでモデルを Sonnet に切り替えます。
 
 ```text
 /model sonnet
-/implement
+/speckit.implement
 ```
 
 > [!NOTE]
-> spec-kit の `/implement` は `tasks.md` を上から順に実装していきます。タスクが複数に分かれている場合、「次のタスクに進んでください」と指示すれば続行します。
+> spec-kit の `/speckit.implement` は `tasks.md` を上から順に実装していきます。タスクが複数に分かれている場合、「次のタスクに進んでください」と指示すれば続行します。
 
 ## 3. 検証（約10分｜経過 約60分）
 
