@@ -14,7 +14,7 @@ Excelファイル（`sample_data.xlsx`）が用意されています。こちら
 
 ## 体験すること（約10分｜経過 約10分）
 
-Claude Code に **[spec-kit](https://github.com/github/spec-kit)** を組み込み、製造設備モニタリングダッシュボードのデータ基盤を構築します。Spec駆動ワークフローは `/speckit-constitution` → `/speckit-specify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-implement` の順に進めます。`/speckit-constitution` で AI の過剰生成を抑える原則を先に定めます。その後 `@sample_data.xlsx` を入力に spec → plan → tasks → implement と段階的に詰めていきます。
+Claude Code に **[spec-kit](https://github.com/github/spec-kit)** を組み込み、製造設備モニタリングダッシュボードのデータ基盤を構築します。`@sample_data.xlsx` を入力に、constitution で AI の過剰生成を縛ったうえで spec → plan → tasks → implement と段階的に詰めていきます（詳細フローは [§1 冒頭の図](#1-spec駆動開発で-seedpy-を作る約40分経過-約40分) を参照）。
 
 ### Spec駆動開発とは
 
@@ -85,7 +85,29 @@ claude
 
 ## 1. Spec駆動開発で seed.py を作る（約40分｜経過 約40分）
 
-ch1 には spec-kit が事前に組み込まれています（`.specify/` と `.claude/skills/` がコミット済み）。`/help` で `/speckit-constitution` `/speckit-specify` `/speckit-plan` `/speckit-tasks` `/speckit-implement` が見えれば OK です。本ハンズオンでは `@sample_data.xlsx` を入力に、AI が暴走しすぎないよう constitution で原則を縛ってから spec → plan → tasks → implement と進みます。
+ch1 には spec-kit が事前に組み込まれています（`.specify/` と `.claude/skills/` がコミット済み）。`/help` で各 `/speckit-*` コマンドが見えれば OK です。
+
+```mermaid
+graph TD
+    A["/speckit-constitution<br/>plan mode"] -->|原則を定義| A1[(".specify/memory/<br/>constitution.md")]
+    A1 --> B["/speckit-specify<br/>plan mode"]
+    B -->|WHAT / WHY| B1[("specs/NNN-*/spec.md")]
+    B1 --> C["/speckit-clarify<br/>plan mode"]
+    C -->|曖昧性を解消し更新| B1
+    B1 --> D["/speckit-plan<br/>plan mode"]
+    D -->|HOW / 技術設計| D1[("specs/NNN-*/plan.md")]
+    D1 --> E["/speckit-tasks<br/>plan mode"]
+    E -->|タスク分解| E1[("specs/NNN-*/tasks.md")]
+    E1 --> F["/speckit-implement<br/>通常 / auto-accept"]
+    F -->|実装| F1[("db/schema.sql<br/>db/seed.py 等")]
+
+    style A fill:#eef,stroke:#33c,stroke-width:1px
+    style B fill:#eef,stroke:#33c,stroke-width:1px
+    style C fill:#eef,stroke:#33c,stroke-width:1px
+    style D fill:#eef,stroke:#33c,stroke-width:1px
+    style E fill:#eef,stroke:#33c,stroke-width:1px
+    style F fill:#efe,stroke:#3a3,stroke-width:1px
+```
 
 ### 1.1. Constitution: `/speckit-constitution` で AI に制約を課す
 
