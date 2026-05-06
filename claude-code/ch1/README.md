@@ -38,15 +38,42 @@ graph LR
 
 ### 現場との相性
 
-準委任契約ベースの継続運用支援が中心で、小〜中規模の固定チーム・要件流動的・案件入れ替わりで暗黙知が消えやすい — そんな現場では、**Spec駆動より Plan-Then-Execute（人がプランを吟味し、AI に実装を委ねるスタイル）の方が回しやすい**。要件流動性が高い案件で Spec を毎回固める運用は、同期コストが釣り合わない。
+準委任契約ベースの継続運用支援が中心で、要件流動性が高い現場では、**Spec駆動より Plan-Then-Execute（人がプランを吟味し、AI に実装を委ねるスタイル）の方が回しやすい**。要件が変わるたびに Spec を固め直す運用は、合意コストが釣り合わない。
 
-![規制強度 × 要件変動性 で見る使い分けマップ](images/fit_quadrant.png)
+合意量の観点で見ると、Zero-shot ↔ Plan-Then-Execute ↔ Spec駆動 は同じ axis 上の異なる地点。AI モデルが賢くなるほど、必要な合意量は減る方向に動く。
 
-→ Spec駆動はメインツールではなく、特定象限で必要になる選択肢。
+<!-- 画像生成プロンプト:
+"Clean horizontal spectrum diagram. A single horizontal axis from left to right with three labeled positions:
+- Left (around 10%): 'Zero-shot' / subtitle '雑な指示 → AI が一発生成'
+- Middle (around 50%): 'Plan-Then-Execute' / subtitle '計画 → 実装、対話で都度補正'
+- Right (around 90%): 'Spec駆動 (spec-kit)' / subtitle '仕様 → 設計 → タスクを固めてから実装'
+Axis label below: '実装前の合意量: 少 → 多'.
+Below the main axis, a smaller secondary arrow labeled 'AI モデルが賢くなるほど中庸点が左へシフト' pointing left.
+Flat design, corporate muted palette (navy, teal, warm amber accent), 16:9, clean sans-serif, white background, no extraneous decoration."
+-->
+
+![合意量スペクトラム](images/agreement_spectrum.png)
+
+> [!NOTE]
+> 技術選定（フレームワーク・言語・データストア）がすでに決まっている案件でも同じ axis が成立する。合意の対象は技術選定だけでなく、要件・設計・タスク粒度まで含むので、技術が固定されていても「実装前にどこまで合意するか」のスペクトラムは残る。
+
+なお、規制対応案件で仕様書納品が契約要件になるケースは存在するが、その場合に必要なのは spec-kit が吐く `spec.md / plan.md / tasks.md`（= AI 向け構造化入力）ではなく、**人が読むことを前提とした仕様書ワークフロー**（人手 + AI ドラフト + フォーマット整備）。spec-kit はそこに直接フィットしないので、本ハンズオンのスコープ外。
 
 ### それでもこのハンズオンで Spec駆動を体験する理由
 
-> Plan-Then-Execute（Plan Mode + 自前スラッシュ + CLAUDE.md など）で spec-kit のほぼ全ては機能的に再現できる。それでも 1 時間通す価値は、**「進め方」をフレームワーク側に固定したとき、何が起きるかを体感するため**。AI は増幅器なので、入力の質が出力に直結する。フレームワーク化は入力の構造化をユーザー任せにせず構造側に引き受ける装置として働き、書き手の粒度差や skill 差を構造側で吸収する。これが本ハンズオンの立場。
+<!-- 画像生成プロンプト:
+"Two-row conceptual comparison diagram showing how a framework normalizes user input before AI amplification.
+Top row labeled 'Plan-Then-Execute (直接渡し)':
+- Three different-sized arrows on the left (representing varied prompt quality from different users) all pointing into a stylized 'AI 増幅器' icon (megaphone/speaker shape).
+- Output side shows three different-sized arrows of varying quality.
+Bottom row labeled 'spec-kit (フレームワーク経由)':
+- Same three different-sized input arrows pointing first into a 'Framework (spec / plan / tasks)' box (depicted as a structured sieve/filter).
+- After the framework, three uniform-sized arrows enter the 'AI 増幅器' icon.
+- Output side shows three uniform-sized output arrows.
+Clean diagrammatic style, corporate muted palette (navy, teal, warm amber accent), 16:9, clean sans-serif, white background."
+-->
+
+![フレームワークが入力を正規化してから AI に渡す](images/framework_filter.png)
 
 - **進め方をフレームワークが引き受ける** — 要件 → 質問 → 設計 → タスク → 実装の順序が固定済み。「次に何を聞くか / どこまで決めるか / いつ実装に入るか」をユーザーが毎回設計しなくていいので、中身の判断に集中できる
 - **抜け漏れが計画前に必ず出る** — `/speckit-clarify` が計画ステップの**前段に固定**されている。AI に「質問して」と頼めば質問は来るが、それは計画の補足。spec-kit では設計入力として組み込まれているので、AI が勝手に仮定して進める前に欠損を出させられる
