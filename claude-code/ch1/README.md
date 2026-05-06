@@ -40,7 +40,7 @@ graph LR
 
 準委任契約ベースの継続運用支援が中心で、要件流動性が高い現場では、**Spec駆動より Plan-Then-Execute（人がプランを吟味し、AI に実装を委ねるスタイル）の方が回しやすい**。要件が変わるたびに Spec を固め直す運用は、合意コストが釣り合わない。
 
-合意量の観点で見ると、Zero-shot ↔ Plan-Then-Execute ↔ Spec駆動 は同じ axis 上の異なる地点。AI モデルが賢くなるほど、必要な合意量は減る方向に動く。
+合意量の観点で見ると、Zero-shot / Plan-Then-Execute / Spec駆動 は **どれだけ事前に合意してから実装するか** の度合いが違うだけ。AI モデルが賢くなるほど、必要な合意量は減る方向に動く。
 
 <!-- 画像生成プロンプト:
 "Clean horizontal spectrum diagram. A single horizontal axis from left to right with three labeled positions:
@@ -54,10 +54,7 @@ Flat design, corporate muted palette (navy, teal, warm amber accent), 16:9, clea
 
 ![合意量スペクトラム](images/agreement_spectrum.png)
 
-> [!NOTE]
-> 技術選定（フレームワーク・言語・データストア）がすでに決まっている案件でも同じ axis が成立する。合意の対象は技術選定だけでなく、要件・設計・タスク粒度まで含むので、技術が固定されていても「実装前にどこまで合意するか」のスペクトラムは残る。
-
-なお、規制対応案件で仕様書納品が契約要件になるケースは存在する。その場合に必要なのは spec-kit が吐く `spec.md / plan.md / tasks.md`（= AI 向け構造化入力）ではない。**人が読むことを前提とした仕様書ワークフロー**（人手 + AI ドラフト + フォーマット整備）が必要になる。spec-kit はそこに直接フィットしないので、本ハンズオンのスコープ外。
+なお、規制対応案件で仕様書納品が契約要件になるケースは存在する。求められるのは**人が読むことを前提とした仕様書**で、spec-kit が吐く `spec.md / plan.md / tasks.md`（AI 向け構造化入力）とは粒度が違う。ただし、spec-kit の出力を**起点に AI で人間向けドラフトを生成する**運用は十分あり得る。その場合、規定フォーマットへの整備や人手レビューなど、別途の対策が必要になる。
 
 ### それでもこのハンズオンで Spec駆動を体験する理由
 
