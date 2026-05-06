@@ -17,14 +17,14 @@ allowed-tools: Bash, Read, Edit, Glob, Grep
 
 以下の各ペアで、記載されたファイルは完全に同一でなければならない。
 
-| 比較                                          | 同一であるべきファイル                                                                                                                                                                |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ch1 → ch2                                     | `db/__init__.py`, `db/schema.sql`, `db/seed.py`, `db/connection.py` (最小実装), `sample_data.xlsx`                                                                                    |
-| ch2 → ch3-playwright / ch3-skill-creator      | `db/__init__.py`, `db/schema.sql`, `db/seed.py`, `sample_data.xlsx`, `tests/__init__.py`, `tests/test_seed.py` (`db/connection.py` は ch3 以降で拡張版に切替)                          |
-| ch3-playwright ↔ ch3-skill-creator (Python側) | `app.py`, `db/connection.py`, `pages/01_equipment_dashboard.py`, `tests/__init__.py`, `tests/test_seed.py`, `db/schema.sql`, `db/seed.py`                                             |
-| ch3-playwright / ch3-skill-creator → ch4      | 上記 + `app.py`, `db/connection.py`, `pages/01_equipment_dashboard.py`                                                                                                                |
-| ch4 → ch5                                     | `sample_data.xlsx`, `db/__init__.py`, `db/schema.sql`, `tests/__init__.py` は同一。その他のPythonファイルはruff適用済みで差分あり                                                     |
-| ch5 → ch5_fin                                 | `db/seed.py`, `db/connection.py`, `pages/01_equipment_dashboard.py`, `tests/test_app.py`, `tests/test_connection.py`, `tests/test_seed.py`                                            |
+| 比較                                          | 同一であるべきファイル                                                                                                                                        |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ch1 → ch2                                     | `db/__init__.py`, `db/schema.sql`, `db/seed.py`, `db/connection.py` (最小実装), `sample_data.xlsx`                                                            |
+| ch2 → ch3-playwright / ch3-skill-creator      | `db/__init__.py`, `db/schema.sql`, `db/seed.py`, `sample_data.xlsx`, `tests/__init__.py`, `tests/test_seed.py` (`db/connection.py` は ch3 以降で拡張版に切替) |
+| ch3-playwright ↔ ch3-skill-creator (Python側) | `app.py`, `db/connection.py`, `pages/01_equipment_dashboard.py`, `tests/__init__.py`, `tests/test_seed.py`, `db/schema.sql`, `db/seed.py`                     |
+| ch3-playwright / ch3-skill-creator → ch4      | 上記 + `app.py`, `db/connection.py`, `pages/01_equipment_dashboard.py`                                                                                        |
+| ch4 → ch5                                     | `sample_data.xlsx`, `db/__init__.py`, `db/schema.sql`, `tests/__init__.py` は同一。その他のPythonファイルはruff適用済みで差分あり                             |
+| ch5 → ch5_fin                                 | `db/seed.py`, `db/connection.py`, `pages/01_equipment_dashboard.py`, `tests/test_app.py`, `tests/test_connection.py`, `tests/test_seed.py`                    |
 
 注: ch1 の `db/connection.py` は **最小実装** (connect / apply_schema / DB_PATH のみ)、ch3 以降の `db/connection.py` はそれを **拡張** したもの (THRESHOLDS / PARAM_LABELS / get_connection / query_df を追加) で、両者は同一にはならない。ch1 → ch2 の `db/connection.py` は同期対象だが、ch2 → ch3 で拡張版に切り替わる。
 
@@ -53,14 +53,14 @@ ch5とch5_finで以下のファイルは差分があって正しい（ch5の演�
 
 ## 各章に存在すべきファイル
 
-| ディレクトリ                       | 含むべきファイル（README.md, pyproject.toml, data/factory.db 以外）                                                                                                                                                                                                |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ch1                                | `db/__init__.py`, `db/schema.sql`, `db/seed.py`, `db/connection.py`, `sample_data.xlsx`, `CLAUDE.md`, `.gitignore`, `.claude/settings.json`, `.specify/` 一式, `specs/001-monitoring-data-foundation/` 一式                                                        |
-| ch2                                | `dashboard.png`, `db/__init__.py`, `db/schema.sql`, `db/seed.py`, `db/connection.py` (ch1 と同一の最小実装), `sample_data.xlsx`, `tests/__init__.py`, `tests/test_seed.py`, `CLAUDE.md`, `.gitignore`, `.claude/settings.json`                                     |
+| ディレクトリ                       | 含むべきファイル（README.md, pyproject.toml, data/factory.db 以外）                                                                                                                                                                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ch1                                | `db/__init__.py`, `db/schema.sql`, `db/seed.py`, `db/connection.py`, `sample_data.xlsx`, `CLAUDE.md`, `.gitignore`, `.claude/settings.json`, `.specify/` 一式, `specs/001-monitoring-data-foundation/` 一式                                                                                 |
+| ch2                                | `dashboard.png`, `db/__init__.py`, `db/schema.sql`, `db/seed.py`, `db/connection.py` (ch1 と同一の最小実装), `sample_data.xlsx`, `tests/__init__.py`, `tests/test_seed.py`, `CLAUDE.md`, `.gitignore`, `.claude/settings.json`                                                              |
 | ch3-playwright / ch3-skill-creator | ch2のファイル（`dashboard.png`除く） + `app.py`, `pages/01_equipment_dashboard.py`。`db/connection.py` は ch1/ch2 の最小実装 + dashboard helper (THRESHOLDS / PARAM_LABELS / query_df) の **拡張版**。ch3-skill-creator には加えて `package.json`, `.npmrc`, `pnpm-lock.yaml`, `.gitignore` |
-| ch4                                | ch3のファイル + `tests/test_app.py`, `tests/test_connection.py`                                                                                                                                                                                                    |
-| ch5                                | ch4と同じファイル構成（ソースはruff適用済み）                                                                                                                                                                                                                      |
-| ch5_fin                            | ch5のファイル + `db/embed.py`, `pages/02_semantic_search.py`, `tests/test_semantic_search.py`（schema.sql は `status_log_embeddings` 追加版、app.py はセマンティック検索ページエントリ追加版）                                                                       |
+| ch4                                | ch3のファイル + `tests/test_app.py`, `tests/test_connection.py`                                                                                                                                                                                                                             |
+| ch5                                | ch4と同じファイル構成（ソースはruff適用済み）                                                                                                                                                                                                                                               |
+| ch5_fin                            | ch5のファイル + `db/embed.py`, `pages/02_semantic_search.py`, `tests/test_semantic_search.py`（schema.sql は `status_log_embeddings` 追加版、app.py はセマンティック検索ページエントリ追加版）                                                                                              |
 
 ## pyproject.toml の同期ルール
 
