@@ -33,6 +33,6 @@ def test_query_df_returns_dataframe():
 
 def test_query_df_with_params():
     """query_df() がパラメータ付きクエリを処理できること"""
-    df = query_df("SELECT * FROM equipment WHERE id = ?", (1,))
+    df = query_df("SELECT * FROM equipment WHERE equipment_id = ?", (1,))
     assert len(df) == 1
     assert df.iloc[0]["name"] == "CNC旋盤 A-01"

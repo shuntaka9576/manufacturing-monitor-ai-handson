@@ -11,9 +11,9 @@ import pytest
 
 torch = pytest.importorskip("torch")
 transformers = pytest.importorskip("transformers")
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoModel, AutoTokenizer  # noqa: E402
 
-from db.connection import DB_PATH
+from db.connection import DB_PATH  # noqa: E402
 
 MODEL_NAME = "pfnet/plamo-embedding-1b"
 
@@ -36,9 +36,10 @@ def embeddings_from_db():
     try:
         rows = conn.execute(
             """
-            SELECT sle.status_log_id, sle.embedding, sl.reason
+            SELECT sle.equipment_id, sle.occurred_at, sle.embedding, sl.reason
             FROM status_log_embeddings sle
-            JOIN status_logs sl ON sle.status_log_id = sl.id
+            JOIN status_logs sl
+                ON sle.equipment_id = sl.equipment_id AND sle.occurred_at = sl.occurred_at
             """
         ).fetchall()
     except sqlite3.OperationalError:

@@ -1,17 +1,20 @@
 """シードスクリプトの検証テスト"""
 
+import math
 import sqlite3
 
 import openpyxl
 import pytest
 
-from db.seed import DB_PATH, EXCEL_PATH, main
+from db.connection import DB_PATH
+from db.seed import XLSX_PATH, main
 
 
 @pytest.fixture(scope="session")
 def db_conn():
     """シードスクリプトを実行して DB を生成し、接続を提供する。"""
-    main()
+    rc = main()
+    assert rc == 0, f"seed main() returned non-zero: {rc}"
     conn = sqlite3.connect(str(DB_PATH))
     conn.execute("PRAGMA foreign_keys = ON")
     yield conn
@@ -21,9 +24,29 @@ def db_conn():
 @pytest.fixture(scope="session")
 def excel_wb():
     """Excel ワークブックを読み込んで提供する。"""
-    wb = openpyxl.load_workbook(EXCEL_PATH, read_only=True, data_only=True)
+    wb = openpyxl.load_workbook(XLSX_PATH, read_only=True, data_only=True)
     yield wb
     wb.close()
+
+
+def _to_iso(ts):
+    if hasattr(ts, "isoformat"):
+        return ts.isoformat()
+    return str(ts)
+
+
+def _to_date(d):
+    if hasattr(d, "strftime"):
+        return d.strftime("%Y-%m-%d")
+    return str(d)
+
+
+def _nan_to_none(v):
+    if v is None:
+        return None
+    if isinstance(v, float) and math.isnan(v):
+        return None
+    return v
 
 
 # --- レコード件数と基本制約のテスト ---
@@ -41,7 +64,10 @@ def test_equipment_ids_sequential(db_conn):
     """設備IDが1〜8の連番であることを確認する。"""
     cur = db_conn.cursor()
     ids = [
-        row[0] for row in cur.execute("SELECT id FROM equipment ORDER BY id").fetchall()
+        row[0]
+        for row in cur.execute(
+            "SELECT equipment_id FROM equipment ORDER BY equipment_id"
+        ).fetchall()
     ]
     assert ids == list(range(1, 9))
 
@@ -52,7 +78,7 @@ def test_foreign_key_constraints(db_conn):
     with pytest.raises(sqlite3.IntegrityError):
         cur.execute(
             "INSERT INTO status_logs "
-            "(equipment_id, timestamp, old_status, new_status, reason) "
+            "(equipment_id, occurred_at, prev_status, new_status, reason) "
             "VALUES (999, '2026-01-01T00:00:00', '稼働中', '停止中', 'テスト')"
         )
     db_conn.rollback()
@@ -75,16 +101,12 @@ def test_equipment_roundtrip(db_conn, excel_wb):
     ws = excel_wb["設備マスタ"]
     excel_rows = []
     for row in ws.iter_rows(min_row=2, values_only=True):
-        name, equipment_type, location, installed_date = row
-        if hasattr(installed_date, "strftime"):
-            installed_date = installed_date.strftime("%Y-%m-%d")
-        else:
-            installed_date = str(installed_date)
-        excel_rows.append((name, equipment_type, location, installed_date))
+        name, equipment_type, location, installed_on = row[:4]
+        excel_rows.append((name, equipment_type, location, _to_date(installed_on)))
 
     cur = db_conn.cursor()
     db_rows = cur.execute(
-        "SELECT name, equipment_type, location, installed_date FROM equipment ORDER BY id"
+        "SELECT name, type, location, installed_on FROM equipment ORDER BY equipment_id"
     ).fetchall()
 
     assert len(excel_rows) == len(db_rows)
@@ -95,92 +117,58 @@ def test_equipment_roundtrip(db_conn, excel_wb):
 def test_status_logs_roundtrip(db_conn, excel_wb):
     """Excel のステータス変更履歴全行と status_logs テーブル全行が一致することを確認する。"""
     ws = excel_wb["ステータス変更履歴"]
-    excel_rows = []
+    excel_map = {}
     for row in ws.iter_rows(min_row=2, values_only=True):
-        (
-            equipment_id,
-            _equipment_name,
-            timestamp,
-            old_status,
-            new_status,
-            reason,
-        ) = row
-        if hasattr(timestamp, "isoformat"):
-            timestamp = timestamp.isoformat()
-        else:
-            timestamp = str(timestamp)
-        excel_rows.append(
-            (
-                int(equipment_id),
-                timestamp,
-                old_status,
-                new_status,
-                reason,
-            )
-        )
+        equipment_id, _equipment_name, occurred_at, prev_status, new_status, reason = row
+        key = (int(equipment_id), _to_iso(occurred_at))
+        excel_map[key] = (prev_status, new_status, reason)
 
     cur = db_conn.cursor()
-    db_rows = cur.execute(
-        "SELECT equipment_id, timestamp, old_status, new_status, reason "
-        "FROM status_logs ORDER BY id"
-    ).fetchall()
+    db_map = {
+        (eq_id, occurred_at): (prev_s, new_s, reason)
+        for eq_id, occurred_at, prev_s, new_s, reason in cur.execute(
+            "SELECT equipment_id, occurred_at, prev_status, new_status, reason FROM status_logs"
+        )
+    }
 
-    assert len(excel_rows) == len(db_rows)
-    for excel_row, db_row in zip(excel_rows, db_rows):
-        assert excel_row == db_row
+    assert excel_map == db_map
 
 
 def test_sensor_readings_roundtrip(db_conn, excel_wb):
     """Excel のセンサーデータ全行と sensor_readings テーブル全行が一致することを確認する（NaN は NULL として比較）。"""
-    import math
-
     ws = excel_wb["センサーデータ"]
-    excel_rows = []
+    excel_map = {}
     for row in ws.iter_rows(min_row=2, values_only=True):
         equipment_id, timestamp, temperature, vibration, rpm, power_kw, pressure = row
-        if hasattr(timestamp, "isoformat"):
-            timestamp = timestamp.isoformat()
-        else:
-            timestamp = str(timestamp)
-
-        def to_none(v):
-            if v is None:
-                return None
-            if isinstance(v, float) and math.isnan(v):
-                return None
-            return v
-
-        excel_rows.append(
-            (
-                int(equipment_id),
-                timestamp,
-                to_none(temperature),
-                to_none(vibration),
-                to_none(rpm),
-                to_none(power_kw),
-                to_none(pressure),
-            )
+        key = (int(equipment_id), _to_iso(timestamp))
+        excel_map[key] = (
+            _nan_to_none(temperature),
+            _nan_to_none(vibration),
+            _nan_to_none(rpm),
+            _nan_to_none(power_kw),
+            _nan_to_none(pressure),
         )
 
     cur = db_conn.cursor()
-    db_rows = cur.execute(
-        "SELECT equipment_id, timestamp, temperature, vibration, rpm, power_kw, pressure "
-        "FROM sensor_readings ORDER BY id"
-    ).fetchall()
+    db_map = {
+        (eq_id, ts): (temp, vib, rpm, power, pressure)
+        for eq_id, ts, temp, vib, rpm, power, pressure in cur.execute(
+            "SELECT equipment_id, timestamp, temperature, vibration, rpm, power_kw, pressure "
+            "FROM sensor_readings"
+        )
+    }
 
-    assert len(excel_rows) == len(db_rows)
-    for excel_row, db_row in zip(excel_rows, db_rows):
-        assert excel_row == db_row
+    assert excel_map == db_map
 
 
 def test_equipment_status_updated(db_conn):
-    """update_equipment_status() により equipment.status が正しく更新されていることを確認する。"""
+    """equipment.status が status_logs の最新エントリ（occurred_at 降順 1 件）と一致することを確認する。"""
     cur = db_conn.cursor()
     rows = cur.execute(
-        "SELECT e.id, e.status, "
+        "SELECT e.equipment_id, e.status, "
         "(SELECT sl.new_status FROM status_logs sl "
-        " WHERE sl.equipment_id = e.id ORDER BY sl.timestamp DESC LIMIT 1) "
-        "FROM equipment e ORDER BY e.id"
+        " WHERE sl.equipment_id = e.equipment_id ORDER BY sl.occurred_at DESC LIMIT 1) "
+        "FROM equipment e ORDER BY e.equipment_id"
     ).fetchall()
 
     for equip_id, actual_status, expected_status in rows:

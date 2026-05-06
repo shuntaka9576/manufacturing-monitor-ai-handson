@@ -20,7 +20,6 @@ def load_model():
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
     model = AutoModel.from_pretrained(MODEL_NAME, trust_remote_code=True, dtype=torch.float32)
-    # transformers 5.x 互換: PlamoConfig に max_length がないため補完
     if not hasattr(model.config, "max_length"):
         model.config.max_length = model.config.max_position_embeddings
     return model, tokenizer
@@ -59,16 +58,17 @@ if query:
 
     rows = conn.execute("""
         SELECT
-            sle.status_log_id,
+            sle.equipment_id,
+            sle.occurred_at,
             sle.embedding,
-            sl.timestamp,
-            sl.old_status,
+            sl.prev_status,
             sl.new_status,
             sl.reason,
             e.name AS equipment_name
         FROM status_log_embeddings sle
-        JOIN status_logs sl ON sle.status_log_id = sl.id
-        JOIN equipment e ON sl.equipment_id = e.id
+        JOIN status_logs sl
+            ON sle.equipment_id = sl.equipment_id AND sle.occurred_at = sl.occurred_at
+        JOIN equipment e ON sl.equipment_id = e.equipment_id
     """).fetchall()
     conn.close()
 
@@ -87,8 +87,8 @@ if query:
                 {
                     "類似度 (%)": round(similarity * 100, 1),
                     "設備名": row["equipment_name"],
-                    "日時": row["timestamp"],
-                    "変更": f"{row['old_status']} → {row['new_status']}",
+                    "日時": row["occurred_at"],
+                    "変更": f"{row['prev_status']} → {row['new_status']}",
                     "理由": row["reason"],
                 }
             )

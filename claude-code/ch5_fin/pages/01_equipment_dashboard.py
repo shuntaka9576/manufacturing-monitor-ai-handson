@@ -8,7 +8,7 @@ from db.connection import PARAM_LABELS, THRESHOLDS, query_df
 st.title("🔧 設備ダッシュボード")
 
 # --- サイドバー: 設備選択 ---
-equipment_df = query_df("SELECT id, name, equipment_type, location, status FROM equipment")
+equipment_df = query_df("SELECT equipment_id, name, type, location, status FROM equipment")
 
 if equipment_df.empty:
     st.warning("設備データがありません。seed.py を実行してください。")
@@ -20,11 +20,11 @@ selected_name = st.sidebar.selectbox(
 )
 
 selected = equipment_df[equipment_df["name"] == selected_name].iloc[0]
-equip_id = int(selected["id"])
+equip_id = int(selected["equipment_id"])
 
 # --- 設備情報カード ---
 info_col1, info_col2, info_col3 = st.columns(3)
-info_col1.markdown(f"**種類**: {selected['equipment_type']}")
+info_col1.markdown(f"**種類**: {selected['type']}")
 info_col2.markdown(f"**設置場所**: {selected['location']}")
 info_col3.markdown(f"**設備ID**: {equip_id}")
 
@@ -87,9 +87,9 @@ gauge_params = [p for p in available_params if gauge_row[p] is not None and gaug
 
 if gauge_params:
     gauge_cols = st.columns(len(gauge_params))
-    for col, param in zip(gauge_cols, gauge_params, strict=True):
+    for col, param in zip(gauge_cols, gauge_params, strict=False):
         value = float(gauge_row[param])
-        equip_thresholds = THRESHOLDS.get(selected["equipment_type"], {})
+        equip_thresholds = THRESHOLDS.get(selected["type"], {})
         threshold = equip_thresholds.get(param, {"warning": 50, "critical": 80})
         label = PARAM_LABELS.get(param, param)
 
@@ -123,9 +123,9 @@ if gauge_params:
 tab_labels = [PARAM_LABELS.get(p, p) for p in available_params]
 tabs = st.tabs(tab_labels)
 
-for tab, param in zip(tabs, available_params, strict=True):
+for tab, param in zip(tabs, available_params, strict=False):
     with tab:
-        equip_thresholds = THRESHOLDS.get(selected["equipment_type"], {})
+        equip_thresholds = THRESHOLDS.get(selected["type"], {})
         threshold = equip_thresholds.get(param, {"warning": 50, "critical": 80})
         label = PARAM_LABELS.get(param, param)
 
@@ -207,13 +207,13 @@ st.subheader("ステータス変更履歴")
 status_df = query_df(
     """
     SELECT
-        timestamp AS 日時,
-        old_status AS 変更前,
+        occurred_at AS 日時,
+        prev_status AS 変更前,
         new_status AS 変更後,
         reason AS 理由
     FROM status_logs
     WHERE equipment_id = ?
-    ORDER BY timestamp DESC
+    ORDER BY occurred_at DESC
 """,
     (equip_id,),
 )

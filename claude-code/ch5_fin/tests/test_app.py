@@ -7,14 +7,14 @@ def test_history_query():
     """ステータス変更履歴クエリが正しくデータを返すこと"""
     df = query_df("""
         SELECT
-            sl.timestamp AS 日時,
+            sl.occurred_at AS 日時,
             e.name AS 設備名,
-            sl.old_status AS 変更前,
+            sl.prev_status AS 変更前,
             sl.new_status AS 変更後,
             sl.reason AS 理由
         FROM status_logs sl
-        JOIN equipment e ON sl.equipment_id = e.id
-        ORDER BY sl.timestamp DESC
+        JOIN equipment e ON sl.equipment_id = e.equipment_id
+        ORDER BY sl.occurred_at DESC
     """)
     assert len(df) > 0
     assert "設備名" in df.columns
@@ -26,15 +26,15 @@ def test_history_filter_by_equipment():
     df = query_df(
         """
         SELECT
-            sl.timestamp AS 日時,
+            sl.occurred_at AS 日時,
             e.name AS 設備名,
-            sl.old_status AS 変更前,
+            sl.prev_status AS 変更前,
             sl.new_status AS 変更後,
             sl.reason AS 理由
         FROM status_logs sl
-        JOIN equipment e ON sl.equipment_id = e.id
+        JOIN equipment e ON sl.equipment_id = e.equipment_id
         WHERE sl.equipment_id = ?
-        ORDER BY sl.timestamp DESC
+        ORDER BY sl.occurred_at DESC
     """,
         (1,),
     )
@@ -44,7 +44,7 @@ def test_history_filter_by_equipment():
 
 def test_equipment_data():
     """設備データが正しく取得できること"""
-    df = query_df("SELECT id, name, equipment_type, location, status FROM equipment")
+    df = query_df("SELECT equipment_id, name, type, location, status FROM equipment")
     assert len(df) == 8
     assert "status" in df.columns
 
@@ -65,13 +65,13 @@ def test_dashboard_status_log_query():
     df = query_df(
         """
         SELECT
-            timestamp AS 日時,
-            old_status AS 変更前,
+            occurred_at AS 日時,
+            prev_status AS 変更前,
             new_status AS 変更後,
             reason AS 理由
         FROM status_logs
         WHERE equipment_id = ?
-        ORDER BY timestamp DESC
+        ORDER BY occurred_at DESC
     """,
         (1,),
     )
