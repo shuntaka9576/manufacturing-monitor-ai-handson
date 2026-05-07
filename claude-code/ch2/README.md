@@ -259,7 +259,7 @@ uv run streamlit run app.py
 /plugin marketplace add anthropics/claude-plugins-official
 ```
 
-project socpeで問題ないです。
+project scope で問題ないです。
 
 ```text
 /plugin install feature-dev@claude-plugins-official
