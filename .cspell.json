@@ -34,6 +34,7 @@
     "hline",
     "hoverinfo",
     "hovermode",
+    "hovertemplate",
     "isoformat",
     "isort",
     "kiro",
@@ -64,6 +65,10 @@
     "timespec",
     "tobytes",
     "venv",
-    "winget"
+    "vline",
+    "winget",
+    "xaxes",
+    "xaxis",
+    "yaxis"
   ]
 }

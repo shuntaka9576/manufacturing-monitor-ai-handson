@@ -16,7 +16,7 @@ Excelファイル（`sample_data.xlsx`）が用意されています。こちら
 
 Claude Code に **[spec-kit](https://github.com/github/spec-kit)** を組み込み、製造設備モニタリングダッシュボードのデータ基盤を構築します。`@sample_data.xlsx` を入力に、constitution で AI の過剰生成を縛ったうえで spec → plan → tasks → implement と段階的に詰めていきます（詳細フローは [§1 冒頭の図](#1-仕様駆動開発で-seedpy-を作る約40分経過-約40分) を参照）。
 
-## 仕様駆動開発について
+## 学ぶこと
 
 ### 概要
 
