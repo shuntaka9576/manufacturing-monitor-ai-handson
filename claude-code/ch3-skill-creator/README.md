@@ -92,7 +92,7 @@ Anthropic 公式の `anthropics/skills` を marketplace として登録します
 ### 1.2. skill-creator をインストール
 
 ```text
-/plugin install skill-creator@anthropic-agent-skills
+/plugin install example-skills@anthropic-agent-skills
 ```
 
 インストールスコープを聞かれたら **Project**（`.claude/settings.json` に記録）を選ぶと、チームで共有できる形になります。
