@@ -225,15 +225,15 @@ uv run streamlit run app.py
 
 ### 6.0. feature-dev プラグインの位置づけ
 
-`feature-dev` は機能開発を7段階に分け、各段で専門サブエージェントを並列に動かす公式プラグインです。各フェーズで明示的に承認待ちが入るため、立ち止まりやすい構成になっています（フェーズ詳細は後述）。
+`feature-dev` は機能開発を7段階に分け、Codebase Exploration / Architecture Design / Quality Review の3フェーズで専門サブエージェントを並列に動かす公式プラグインです。Phase 3/4/5/6 の境目で都度ユーザーに判断を委ねるため、立ち止まりやすい構成になっています（フェーズ詳細は後述）。
 
-| 観点             | ネイティブプランモード        | feature-dev プラグイン                                 |
-| ---------------- | ----------------------------- | ------------------------------------------------------ |
-| 既存コードの探索 | ユーザーが Read / Grep で誘導 | `code-explorer` が並列で追跡し必読ファイルを返す       |
-| 設計案           | 単一案を計画書に書き下す      | `code-architect` が3案（最小変更／クリーン／バランス） |
-| 実装             | フェーズ単位でユーザーが指示  | プラグインがフェーズ進行を管理                         |
-| レビュー         | 別途 `/review` などを呼ぶ     | `code-reviewer` が完了時に自動レビュー                 |
-| 待機ポイント     | 都度 `Shift+Tab` で切替       | 各フェーズで明示的に承認待ち                           |
+| 観点             | ネイティブプランモード        | feature-dev プラグイン                                                     |
+| ---------------- | ----------------------------- | -------------------------------------------------------------------------- |
+| 既存コードの探索 | ユーザーが Read / Grep で誘導 | `code-explorer` を2〜3個並列で起動し必読ファイルを返す                     |
+| 設計案           | 単一案を計画書に書き下す      | `code-architect` が2〜3案を並列生成（最小変更／クリーン／バランス）        |
+| 実装             | フェーズ単位でユーザーが指示  | プラグインがフェーズ進行を管理                                             |
+| レビュー         | 別途 `/review` などを呼ぶ     | 3つの `code-reviewer` を観点別（簡潔さ／バグ／プロジェクト規約）に並列起動 |
+| 待機ポイント     | 都度 `Shift+Tab` で切替       | Phase 3/4/5/6 の境目で都度ユーザーが判断                                   |
 
 > [!NOTE]
 > どちらが優れているかではなく使い分けの話です。UI の細かい試行錯誤や対話で詰めたいものはネイティブプランモード、新規ページや横断的な機能追加は feature-dev、と切り分けるのが現実的です。
@@ -241,12 +241,12 @@ uv run streamlit run app.py
 <details>
 <summary>7フェーズの動き（参考）</summary>
 
-1. **Discovery** ── 要件と曖昧性の把握
-2. **Codebase Exploration** ── `code-explorer` が並列で既存実装を追跡
+1. **Discovery** ── 要件と曖昧性の把握（メイン Claude）
+2. **Codebase Exploration** ── `code-explorer` を2〜3個並列で起動し既存実装を追跡
 3. **Clarifying Questions** ── プラグインから質問が来る。スキップしないのが特徴
-4. **Architecture Design** ── `code-architect` が3案提示
+4. **Architecture Design** ── `code-architect` が**2〜3案**を並列提示
 5. **Implementation** ── 承認後にメイン Claude が実装
-6. **Quality Review** ── `code-reviewer` が信頼度80%以上の指摘のみ報告
+6. **Quality Review** ── 3つの `code-reviewer` を観点別に並列起動し、信頼度スコア（0-100）が**80以上**の指摘のみ報告。終了時に Fix now / Fix later / Proceed as-is をユーザーに確認
 7. **Summary** ── 変更ファイル一覧と次の一手
 
 </details>
