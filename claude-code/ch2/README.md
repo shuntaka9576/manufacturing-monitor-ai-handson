@@ -219,6 +219,8 @@ uv run streamlit run app.py
 
 ## 6. feature-dev プラグインで「同じネタ」を実装してみる（約20分｜経過 約85分）
 
+時間が余った場合です。
+
 セクション 4 で自由スタイルで実装したグラフクリック → ゲージ連動機能を、今度は公式プラグイン `feature-dev` に任せて再実装します。同じ要件を別のワークフローで通すことで、ネイティブのプランモードと feature-dev のサブエージェント駆動の違いを体感するのが目的です。
 
 ### 6.0. feature-dev プラグインの位置づけ
@@ -257,24 +259,20 @@ uv run streamlit run app.py
 /plugin marketplace add anthropics/claude-plugins-official
 ```
 
+project socpeで問題ないです。
+
 ```text
 /plugin install feature-dev@claude-plugins-official
 ```
 
 導入後、`/plugin` で一覧を開き `feature-dev` が installed 状態になっていれば準備完了です。
 
-> [!NOTE]
-> プラグインはユーザーグローバル領域（`~/.config/claude/plugins/`）に入ります。プロジェクトの `.claude/settings.json` には影響しないため、他の章にも横断して利用できます。
-
 ### 6.2. `/feature-dev` で同じ機能を依頼する
-
-クリーンに比較したい場合は、セクション 4 の変更を別ブランチや worktree に退避させてから依頼すると差分が見やすくなります。時間がなければ同じブランチに上書きで進めても OK で、その場合は「feature-dev が既存実装をどう扱うか」という別の観察ポイントになります。
 
 `/feature-dev` を発火し、セクション 4 と同じ機能を依頼します。
 
 ```text
-/feature-dev 時系列グラフのデータ点をクリックしたら、ゲージチャートがその時刻のセンサー値に更新される機能を `pages/01_equipment_dashboard.py` に追加してください。
-セクション 4 で同じ機能を自由スタイルで実装したものと比較する目的なので、フェーズを丁寧に踏んで設計案や実装計画を提示してください。
+/feature-dev:feature-dev 時系列グラフのデータ点をクリックしたら、ゲージチャートがその時刻のセンサー値に更新される機能を `pages/01_equipment_dashboard.py` に追加してください。
 ```
 
 ### 6.3. 各フェーズで体験するポイント
