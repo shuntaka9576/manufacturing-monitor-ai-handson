@@ -56,6 +56,7 @@ claude
 
 ```text
 /model opusplan
+/effort high
 ```
 
 > [!NOTE]
@@ -64,6 +65,9 @@ claude
 > ```bash
 > export ANTHROPIC_DEFAULT_OPUS_MODEL='us.anthropic.claude-opus-4-7[1m]'
 > ```
+
+> [!NOTE]
+> `/effort high` は推論深度（Effort Level）を high に固定します。デフォルト（auto / max 相当）だと推論が深くなり過ぎて応答が鈍るので、ハンズオンのテンポを保つために high で運用します。もっと深く考えさせたいときは `/effort max`、軽く流したいときは `/effort medium` など適宜切り替え可能です。
 
 ## 1. UI仕様を作成する（約10分｜経過 約15分）
 
