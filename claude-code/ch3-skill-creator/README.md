@@ -263,6 +263,8 @@ Claude Code で以下を入力します。
 
 `daily-operations-report` スキルが自動でトリガーされ、`reports/2026-03-07-operations.md` が生成されます。
 
+![Claude Code 上で「2026-03-07 の稼働日報を出力してください」と入力すると daily-operations-report スキルが読み込まれ、reports/2026-03-07-operations.md が生成される様子](./images/daily-operations-report-run.png)
+
 #### チェック項目
 
 - [ ] `.claude/skills/daily-operations-report/SKILL.md` が存在すること
