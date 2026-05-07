@@ -12,3 +12,8 @@ claude-code/ch1/CLAUDE.md
 
 # AI 生成の技術仕様書（コード例やAPI名が含まれるため lint 不要）
 **/docs/implement-snapshot/
+
+# skill-creator が生成する成果物（受講者ごとに変わるため lint 不要）
+**/.claude/skills/daily-operations-report/
+claude-code/ch3-skill-creator/daily-operations-report-workspace/
+claude-code/ch3-skill-creator/reports/

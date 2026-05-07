@@ -24,6 +24,7 @@
     "dataframe",
     "dtype",
     "dups",
+    "evals",
     "executemany",
     "executescript",
     "fetchone",

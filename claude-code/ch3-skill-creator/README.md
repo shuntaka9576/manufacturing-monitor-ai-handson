@@ -2,10 +2,12 @@
 
 ## 概要
 
-ch2 で構築した設備ダッシュボードをそのまま題材に、Agent Skills の以下の流れを 4 つの Phase で体験します。
+ch2 で構築した設備ダッシュボードをそのまま題材に、Agent Skills の以下の流れを 4 つの Phase で体験します。中心は **Phase 2 の自作スキル開発（評価ループ込み）** です。
+
+![ch3 全体像: Phase 1 (公式マケプレから skill-creator 導入) → Phase 2 (自作スキルを作って育てる: 事前調査 / 初版 + 評価ループ / 対話化 / 検証) → Phase 3 (gh skill で外部スキル導入) → Phase 4 (まとめ)](./images/ch3-overview.png)
 
 - Phase 1: skill-creator を導入する ── Claude Code 公式マーケットプレイスからインストール
-- Phase 2: 自作スキルを作って育てる ── 「事前調査 → 初版 → Progressive Disclosure 改善 → 対話化」のサイクル
+- Phase 2: 自作スキルを作って育てる ── 「事前調査 → 初版 + 評価ループ → 対話化 → 検証」のサイクル
 - Phase 3: 外部スキルを扱う ── 公式マケプレ外のスキルを `gh skill` で導入
 - Phase 4: まとめ
 
@@ -100,7 +102,7 @@ Anthropic 公式の `anthropics/skills` を marketplace として登録します
 
 ---
 
-## Phase 2: 自作スキルを作って育てる（約41分｜経過 約49分）
+## Phase 2: 自作スキルを作って育てる（約27分｜経過 約35分）
 
 「作る → 出す → 直す → 対話化」のサイクルでスキルを育てます。先に Phase 2.1 で必要な仕様知識を仕入れてから、Phase 2.2 以降の実装に入ります。
 
@@ -121,7 +123,7 @@ AskUserQuestion ツールの使い方（引数構造と典型的な使いどこ�
 
 `AskUserQuestion` をスキルに組み込めると、**AI に独断させたくない判断ポイント**（対象日が無い / 既存ファイルと衝突する など）で、確定した選択肢から人間に決めさせる**安全な分岐**をスキル内に作れます。これが無いスキルは「自由入力 → AI が勝手に解釈 → 意図しない上書き」を起こしがちです。
 
-Phase 2.4 で daily-operations-report にこの分岐を組み込みますが、その前に素のツールを 1 度呼んで挙動を確認します。AskUserQuestion には**単一選択 / 複数選択 / preview 付き比較 / 推奨ラベル**といった機能差があるため、3 問それぞれで別の機能を試して引き出しを増やします。
+Phase 2.3 で daily-operations-report にこの分岐を組み込みますが、その前に素のツールを 1 度呼んで挙動を確認します。AskUserQuestion には**単一選択 / 複数選択 / preview 付き比較 / 推奨ラベル**といった機能差があるため、3 問それぞれで別の機能を試して引き出しを増やします。
 
 Claude Code に以下を入力します。
 
@@ -225,6 +227,27 @@ eval-viewer には **3 prompts × 2 modes = 6 件** が並びます。WITHOUT SK
 
 #### 生成されたスキルを確認
 
+eval ループを経て、skill-creator は **Progressive Disclosure**（3 レベルの遅延ロード設計）に沿った構造でスキルを出します。重い情報は Level 3 に退避し、Level 2 の SKILL.md 本文は短く保たれているのが理想です。
+
+- Level 1 / Metadata（name + description）— 起動時に全スキル分が system prompt に常駐。〜100 語/skill に抑える
+- Level 2 / SKILL.md 本文 — trigger 時のみ全文ロード。500 行未満が推奨
+- Level 3 / Bundled Resources（`scripts/`, `references/`, `assets/`） — 本文から参照された時だけ読込。scripts は実行のみで context を食わない
+
+期待される構成例:
+
+```
+.claude/skills/daily-operations-report/
+├── SKILL.md                      # Level 2: 高レベルガイド (短く保つ)
+├── references/
+│   └── schema.md                 # Level 3: DB スキーマ・SQL サンプル
+├── scripts/
+│   └── aggregate.py              # Level 3: 集計ロジック本体
+└── assets/
+    └── report-template.md        # Level 3: 出力テンプレート
+```
+
+実物を確認します。
+
 ```bash
 ls .claude/skills/daily-operations-report/
 cat .claude/skills/daily-operations-report/SKILL.md
@@ -243,68 +266,14 @@ Claude Code で以下を入力します。
 #### チェック項目
 
 - [ ] `.claude/skills/daily-operations-report/SKILL.md` が存在すること
-- [ ] description が曖昧、SQL/Python が SKILL.md 本文に直書き、scripts 未分離 ── といった「太った初版」になっていること（Phase 2.3 のレビューで改善します）
+- [ ] SKILL.md 本文が短く保たれ、`scripts/` `references/` `assets/` に詳細が退避されていること
+- [ ] description が「日報を出力したいときに使う」と明確に伝わる記述になっていること
 - [ ] 指定ディレクトリに日報 `.md` が生成されていること
 - [ ] 設備別の稼働率・停止件数・生産数が含まれていること
 
-### 2.3. Progressive Disclosure で改善する（約14分）
+### 2.3. AskUserQuestion で対話化する（約6分）
 
-Agent Skills は 3 つの Level で遅延ロードされる設計です（Progressive Disclosure）。
-
-- Level 1 / Metadata（name + description）— 起動時に全スキル分が system prompt に常駐。〜100 語/skill に抑える
-- Level 2 / SKILL.md 本文 — trigger 時のみ全文ロード。500 行未満が推奨
-- Level 3 / Bundled Resources（`scripts/`, `references/`, `assets/`） — 本文から参照された時だけ読込。scripts は実行のみで context を食わない
-
-重い情報を Level 3 に退避するのが鉄則です。skill-creator にレビューを依頼します。
-
-> [!NOTE]
-> なぜ skill-creator は初版で綺麗に作ってくれないのか（マッチポンプ疑惑）
->
-> 「新規生成の時点で Progressive Disclosure を満たしてくれればレビュー不要では？」は正当な疑問です。しかし、この 2 パス構造は skill-creator の限界ではなく、情報が生成行為によってしか現れない問題に対する合理的設計と見るのが正確です。
->
-> 1. 初版作成時には配置判断の根拠が存在しない — 「何が重くて何を分離すべきか」を決めたくても、SQL の具体形も SKILL.md 本文の量もまだ存在しない。分離点を決める材料がない。
-> 2. 生成した成果物そのものが、次パスの入力コンテキストになる — 一度作って実体（Level 2 の膨らみ方、scripts に出せる純粋コード、references に出せる仕様情報）を手に入れて、はじめて最適配置を判断できる。
-> 3. ソフトウェア設計で見慣れたパターン — Spike → Refactor / 下書き → 推敲 / Actor-Critic / Reflection loops。いずれも「作ってみないと構造が決まらない問題」を 2 パスで解く手法。
-> 4. 教育的デザインとしても意図的 — Phase 2.2 で「わざと粗い初版を作る」と明示しており、差分（初版 → 改善版）を体験させることが狙い。
->
-> 実運用でも「生成 → 実測 → 構造化」のサイクルは有効です。AI が作るスキルも、生成したものを実測して構造を整える工程があってはじめて筋の通った資産になる、という学びを持ち帰ってください。
-
-#### レビュー依頼
-
-> [!IMPORTANT]
-> ここは Plan モードで実行してください。Claude Code のプロンプト下部が `auto mode on` や `accept edits on` になっている場合は、`Shift+Tab` を押して `plan mode on` に切り替えます。Plan モードでは skill-creator が提案プランのみを出力し、ファイル変更は行いません。受講者が何を指摘してきたかを吟味してから適用するのがこのフェーズの学びです。
-
-```text
-/skill-creator で .claude/skills/daily-operations-report/ をレビューして、気になった点を改善してください。
-```
-
-観点を人間側から指示する必要はありません。Progressive Disclosure の評価は skill-creator 自身が持つべき知識です。skill-creator が差分を提案してきたら、どのレベルの問題をどう指摘してきたかに注目しつつ適用してください（Plan を承認すると自動で通常モードに戻り、実装が走ります）。
-
-#### 改善後の構造を確認
-
-期待される構成例:
-
-```
-.claude/skills/daily-operations-report/
-├── SKILL.md                      # Level 2: 高レベルガイド (短く保つ)
-├── references/
-│   └── schema.md                 # Level 3: DB スキーマ・SQL サンプル
-├── scripts/
-│   └── aggregate.py              # Level 3: 集計ロジック本体
-└── assets/
-    └── report-template.md        # Level 3: 出力テンプレート
-```
-
-#### チェック項目
-
-- [ ] description が「日報を出力したいときに使う」と明確に伝わる記述になっていること
-- [ ] SKILL.md 本文が大幅に短くなっていること
-- [ ] `scripts/aggregate.py` が分離されていること
-- [ ] `references/` または `assets/` に詳細が退避されていること
-
-### 2.4. AskUserQuestion で対話化する（約6分）
-
-ここまでで Progressive Disclosure の構造は整いました。最後に「最小の指示で動くスキル」から「実運用で任せられる対話型スキル」へ進化させます。
+Phase 2.2 で骨組みと評価が整ったので、最後に「最小の指示で動くスキル」から「実運用で任せられる対話型スキル」へ進化させます。
 
 `AskUserQuestion` は選択肢を明示して対話するツールです。自由入力よりモデルの暴走を抑え再現性が上がるため、運用フローに組み込みたいスキルでは第一選択になります。
 
@@ -345,7 +314,7 @@ skill-creator が差分を提案するので、内容を確認して適用しま
 2026-03-08 の稼働日報を出力してください
 ```
 
-新しい日付で実行し、Progressive Disclosure の構造 × AskUserQuestion の対話確認が合わさった実運用寄りのスキルになっていることを確認します。
+新しい日付で実行し、Progressive Disclosure に沿った構造 × AskUserQuestion の対話確認が合わさった実運用寄りのスキルになっていることを確認します。
 
 #### チェック項目
 
@@ -353,18 +322,18 @@ skill-creator が差分を提案するので、内容を確認して適用しま
 - [ ] 対象日を省略すると 2026-03-01 〜 2026-03-08 の選択肢 UI が出ること
 - [ ] 既存日付を指定したときに上書き確認ダイアログが出ること
 
-### 2.5. Phase 2 検証（約3分）
+### 2.4. Phase 2 検証（約3分）
 
 #### チェック項目
 
 - [ ] `.claude/skills/daily-operations-report/` が存在すること
-- [ ] 改善後の `daily-operations-report` が Progressive Disclosure の 3 レベルを活用した構造になっていること
+- [ ] `daily-operations-report` が Progressive Disclosure の 3 レベルを活用した構造になっていること
 - [ ] `daily-operations-report` に `AskUserQuestion` による対話確認が組み込まれていること
 - [ ] `claude-code-guide` を使って仕様調査した経験があること（メインセッションとは別タスクで動くことを体感済み）
 
 ---
 
-## Phase 3: 外部スキルを扱う（約5分｜経過 約54分）
+## Phase 3: 外部スキルを扱う（約5分｜経過 約40分）
 
 Phase 1〜2 では Claude Code 公式マケプレにあるスキルの扱いを学びました。実務では GitHub の他リポジトリで公開されているスキルや、社内独自スキルを扱いたい場面もあります。Phase 3 では代表的なツールとして `gh skill` を試します。
 
@@ -392,9 +361,19 @@ gh skill list
 
 ### 3.2. 更新と削除
 
+更新は **対象スキル名を明示** して実行します（`gh skill install` で metadata 付きで入っているため、引数指定だけで OK）。
+
 ```bash
-gh skill update --all
-gh skill uninstall <owner>/<repo> <skill>
+gh skill update mcp-builder
+```
+
+> [!NOTE]
+> `--all` で全件更新もできますが、`/plugin install` や手動配置で入った metadata 無しのスキルがあると、1 件ずつ「source repository は？」と質問されます。ハンズオン中は今回入れたものだけ指定するのが楽です。
+
+削除も同様に対象を指定します。
+
+```bash
+gh skill uninstall anthropics/skills mcp-builder
 ```
 
 ### チェック項目
