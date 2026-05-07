@@ -8,7 +8,7 @@ ch2 で構築した設備ダッシュボードをそのまま題材に、Agent S
 
 - Phase 1: skill-creator を導入する ── Claude Code 公式マーケットプレイスからインストール
 - Phase 2: 自作スキルを作って育てる ── 「事前調査 → 初版 + 評価ループ → 対話化 → 検証」のサイクル
-- Phase 3: 外部スキルを扱う ── 公式マケプレ外のスキルを `gh skill` で導入
+- Phase 3: サードパーティスキル管理ツール ── `gh skill` で取り込み / 公開前バリデーション
 - Phase 4: まとめ
 
 ### Agent Skills とは
@@ -333,23 +333,26 @@ skill-creator が差分を提案するので、内容を確認して適用しま
 
 ---
 
-## Phase 3: 外部スキルを扱う（約5分｜経過 約40分）
+## Phase 3: サードパーティスキル管理ツール（約5分｜経過 約40分）
 
-Phase 1〜2 では Claude Code 公式マケプレにあるスキルを扱いました。Phase 3 はそこに無い**任意の GitHub リポジトリのスキル**を取り込むためのツールとして `gh skill` を扱います。`gh skill install` は `--pin <SHA / タグ>` で特定コミットに固定して取得でき、配布元の `main` が後日改変されても自分の環境は影響を受けない運用ができます。
+Phase 1〜2 では Claude Code 公式マケプレにあるスキルを扱いました。Phase 3 は GitHub リポジトリのスキルを取り込むためのツールとして `gh skill` を扱います。
 
 なお、別実装として vercel-labs/skills には `skills-lock.json` という manifest で skill の版管理を行う事例もあります（本ハンズオンでは紹介のみ）。
 
-> [!NOTE]
-> 事前に [SETUP.md §9](../SETUP.md) を見て GitHub CLI v2.90.0+ を用意してください。`gh skill` は Public Preview のため仕様変更の可能性があります。本章執筆時点で利用可能なサブコマンドは `install / preview / update / search / publish` です（**`list` と `uninstall` は存在しません**）。
+以下を学ぶためです。
 
-#### 外部スキルのリスクと対策
+**各エージェントのディレクトリ問題を解消**
 
-外部スキルは GitHub による署名検証を経ていないため 2 種類のリスクがあります。`gh skill` はそれぞれに対応する仕組みを **GitHub プリミティブ（タグ / リリース / コミット SHA）** を活用して提供します。
+gh skill＝どのエージェント（Copilot / Claude / Cursor / Codex / Gemini）にも、それぞれの正しい場所に入れてくれる
 
-| リスク                                                                        | 対策                                              | 防げるシナリオ                                                                            |
-| ----------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **コンテンツリスク**（プロンプトインジェクション・悪意あるスクリプトの混入）  | `gh skill preview` でインストール前に中身を確認   | 配布物を読んで「変な instructions / スクリプトが無い」と確認する                          |
-| **サプライチェーンリスク**（後日コミットが改変される / 悪意ある PR が merge） | `gh skill install --pin <タグ or SHA>` で固定導入 | `main` ブランチの後日改変、リポジトリ乗っ取り、悪意ある version bump から自分の環境を守る |
+**GitHub プリミティブをサプライチェーン対策に使える**
+
+外部スキルは GitHub による署名検証を経ていないため 2 種類のリスクがあります。`gh skill` には **GitHub プリミティブ（タグ / リリース / コミット SHA）** を使って installer 側でリスクを緩和する手段が用意されています（pin 無しでも install 自体は可能で、これらは任意の opt-in です）。
+
+| リスク                                                                        | 緩和策（installer 側）                          | 補足                                                             |
+| ----------------------------------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| **コンテンツリスク**（プロンプトインジェクション・悪意あるスクリプトの混入）  | `gh skill preview` でインストール前に中身を確認 | 配布物を読んで「変な instructions / スクリプトが無い」と確認する |
+| **サプライチェーンリスク**（後日コミットが改変される / 悪意ある PR が merge） | `gh skill install --pin <SHA>` で commit に固定 | SHA pin が確実。タグ pin は配布元側で付け替えられる場合がある    |
 
 ### 3.1. preview で中身を確認する（コンテンツリスク対策）
 
@@ -357,7 +360,7 @@ Phase 1〜2 では Claude Code 公式マケプレにあるスキルを扱いま�
 gh skill preview anthropics/skills mcp-builder
 ```
 
-`SKILL.md` 本文と bundled resources の内容が表示されます。意図不明な instructions やスクリプトが無いか目視確認してください。
+ライブラリと同じで全て読むことは現実的ではありません。配布元の信頼性や GitHub上の評判(スターや更新頻度、Immutable Release)などを考慮します。不安が残る場合は導入手順では `--pin <SHA>` で固定 + 初回レビューが良いです。
 
 ### 3.2. インストール（pin でサプライチェーンリスク対策）
 
@@ -404,12 +407,43 @@ gh skill update mcp-builder
 rm -rf .claude/skills/mcp-builder
 ```
 
+### 3.5. 自作スキルの公開前バリデーション
+
+`gh skill publish --dry-run` で、ローカルにある SKILL.md を [agentskills.io](https://agentskills.io) 仕様に対して検証できます。Phase 2 で作った `daily-operations-report` を社内・OSS に公開する前のチェックに使います。
+
+`gh skill publish` は実行カレントディレクトリの直下にある `<skill-name>/SKILL.md` を探します。Claude Code 規約の `.claude/skills/<name>/SKILL.md` をそのまま検証するには、**親ディレクトリ `.claude/skills/` で実行**します。
+
+```bash
+cd .claude/skills && gh skill publish --dry-run
+```
+
+> [!IMPORTANT]
+> **`--dry-run` を必ず付けて実行してください**。これを付けると検証のみで何も変更しません。
+>
+> 仮に付け忘れても、`gh skill publish` はインタラクティブモードに入って各ステップ（`agent-skills` トピック追加 / タグ選択 / release 作成）で確認プロンプトが出るので、いきなり release が作成されることはありません。さらに本ハンズオンのリポジトリは受講者にとって書き込み権限の無い public リポジトリなので、仮に確認プロンプトを進めても GitHub 側で permission denied になり、release やタグが作られることはありません。
+>
+> 実際に GitHub Release を作って公開するときは `--dry-run` を外し、`--tag <version>` を付けて実行します（例: `gh skill publish --tag v1.0.0`）。本ハンズオンでは公開までは行いません。
+
+検証内容（公式仕様）
+
+- skill 名が agentskills.io の命名規則に準拠しているか
+- skill 名が**ディレクトリ名と一致**しているか
+- frontmatter の必須フィールド（`name`, `description`）が存在するか
+- `allowed-tools` が string で書かれているか（array は不可）
+- install metadata（`metadata.github-*`）が混入していないか
+
+警告として出やすいもの
+
+- `recommended field missing: license` ── frontmatter に `license` を追記すると消える（推奨）
+- `no active tag protection rulesets found. Consider protecting tags to ensure immutable releases (Settings > Rules > Rulesets)` ── 配布元 GitHub repo に **tag protection rulesets** を設定すると、リリースタグを後から付け替えできなくなり、`--pin <タグ>` で取り込む側が真の immutable release を享受できる
+
 ### チェック項目
 
 - [ ] `gh skill preview` で SKILL.md の中身を確認した
 - [ ] `ls .claude/skills/` にインストールしたスキルが表示されること
 - [ ] Claude Code の `/` 補完に当該スキルが現れること
 - [ ] `gh skill update <skill>` が metadata 質問なしで完走すること
+- [ ] `gh skill publish --dry-run` が `daily-operations-report` の検証を通過すること
 
 ---
 
