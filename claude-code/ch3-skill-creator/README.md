@@ -76,7 +76,7 @@ Anthropic 公式の `anthropics/skills` を marketplace として登録します
 `anthropic-agent-skills` が表示されれば成功です。
 
 > [!NOTE]
-> バージョンを固定したい場合は `anthropics/skills#v1.0.0` のようにタグ指定でマーケットプレイスを追加してください。
+> タグ運用しているマーケットプレイスなら `<owner>/<repo>#<タグ>` の形でバージョンを固定できます（`anthropics/skills` は現時点でタグ未運用のため、`main` 追従になります）。
 
 ### 1.3. skill-creator をインストール（約2分）
 
@@ -335,31 +335,54 @@ skill-creator が差分を提案するので、内容を確認して適用しま
 
 ## Phase 3: 外部スキルを扱う（約5分｜経過 約40分）
 
-Phase 1〜2 では Claude Code 公式マケプレにあるスキルの扱いを学びました。実務では GitHub の他リポジトリで公開されているスキルや、社内独自スキルを扱いたい場面もあります。Phase 3 では代表的なツールとして `gh skill` を試します。
+Phase 1〜2 では Claude Code 公式マケプレにあるスキルを扱いました。Phase 3 はそこに無い**任意の GitHub リポジトリのスキル**を取り込むためのツールとして `gh skill` を扱います。`gh skill install` は `--pin <SHA / タグ>` で特定コミットに固定して取得でき、配布元の `main` が後日改変されても自分の環境は影響を受けない運用ができます。
 
-| ツール                   | 強み                                               | 向いているケース                               |
-| ------------------------ | -------------------------------------------------- | ---------------------------------------------- |
-| Claude Code 公式マケプレ | 公式登録済みスキルを `/plugin install` で一発導入  | Anthropic 公式配布を使うとき（推奨）           |
-| `gh skill`               | GitHub CLI から `--pin <tag>` でバージョン固定導入 | 非公式 GitHub リポジトリのスキルを入れたいとき |
+なお、別実装として vercel-labs/skills には `skills-lock.json` という manifest で skill の版管理を行う事例もあります（本ハンズオンでは紹介のみ）。
 
 > [!NOTE]
-> 事前に [SETUP.md §9](../SETUP.md) を見て GitHub CLI v2.90.0+ を用意してください。`gh skill` は Public Preview のため仕様変更の可能性があります。
+> 事前に [SETUP.md §9](../SETUP.md) を見て GitHub CLI v2.90.0+ を用意してください。`gh skill` は Public Preview のため仕様変更の可能性があります。本章執筆時点で利用可能なサブコマンドは `install / preview / update / search / publish` です（**`list` と `uninstall` は存在しません**）。
 
-### 3.1. インストールと一覧
+#### 外部スキルのリスクと対策
 
-別のスキル（例として公式リポジトリの `mcp-builder`）を pin 付きで入れる例です。
+外部スキルは GitHub による署名検証を経ていないため 2 種類のリスクがあります。`gh skill` はそれぞれに対応する仕組みを **GitHub プリミティブ（タグ / リリース / コミット SHA）** を活用して提供します。
+
+| リスク                                                                        | 対策                                              | 防げるシナリオ                                                                            |
+| ----------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **コンテンツリスク**（プロンプトインジェクション・悪意あるスクリプトの混入）  | `gh skill preview` でインストール前に中身を確認   | 配布物を読んで「変な instructions / スクリプトが無い」と確認する                          |
+| **サプライチェーンリスク**（後日コミットが改変される / 悪意ある PR が merge） | `gh skill install --pin <タグ or SHA>` で固定導入 | `main` ブランチの後日改変、リポジトリ乗っ取り、悪意ある version bump から自分の環境を守る |
+
+### 3.1. preview で中身を確認する（コンテンツリスク対策）
 
 ```bash
-gh skill install anthropics/skills mcp-builder --agent claude-code --pin <タグ>
+gh skill preview anthropics/skills mcp-builder
 ```
 
-インストール済みスキルを一覧します。
+`SKILL.md` 本文と bundled resources の内容が表示されます。意図不明な instructions やスクリプトが無いか目視確認してください。
+
+### 3.2. インストール（pin でサプライチェーンリスク対策）
+
+中身を確認できたら導入します。**実運用では `--pin <SHA>` か `--pin <タグ>` を付けてバージョンを固定**してください。pin することで、配布元の `main` が後日改変されても自分の環境は影響を受けません。
+
+`anthropics/skills` リポジトリは現時点でタグ・リリースが切られていないので、ハンズオンでは **コミット SHA** で固定します。最新コミット SHA は GitHub API で取得できます。
 
 ```bash
-gh skill list
+# 1. 最新コミット SHA（短縮形）を取得
+gh api repos/anthropics/skills/commits/main --jq '.sha[0:7]'
+# → 例: d211d43
+
+# 2. その SHA に固定して install
+gh skill install anthropics/skills mcp-builder --agent claude-code --pin d211d43
 ```
 
-### 3.2. 更新と削除
+スコープを聞かれたら **Project** を選ぶと `.claude/skills/<skill>/` 配下に配置されます。インストール完了時の出力に `Installed mcp-builder (from anthropics/skills@<full-SHA>)` と固定先が表示されるので、その SHA で動いていることが確認できます。
+
+インストール済みかどうかはファイルシステムか Claude Code の `/` 補完で確認します（`gh skill list` は無いため）。
+
+```bash
+ls .claude/skills/
+```
+
+### 3.3. 更新
 
 更新は **対象スキル名を明示** して実行します（`gh skill install` で metadata 付きで入っているため、引数指定だけで OK）。
 
@@ -370,16 +393,23 @@ gh skill update mcp-builder
 > [!NOTE]
 > `--all` で全件更新もできますが、`/plugin install` や手動配置で入った metadata 無しのスキルがあると、1 件ずつ「source repository は？」と質問されます。ハンズオン中は今回入れたものだけ指定するのが楽です。
 
-削除も同様に対象を指定します。
+> [!NOTE]
+> `--pin` で固定したスキルは update から自動でスキップされます（意図せず新バージョンに上書きされない、サプライチェーン対策の一部）。pin を解除して最新まで追従させたいときは `gh skill update <skill> --unpin` を使います。
+
+### 3.4. 削除
+
+`gh skill` に `uninstall` サブコマンドは無いため、ファイルシステムから直接削除します。
 
 ```bash
-gh skill uninstall anthropics/skills mcp-builder
+rm -rf .claude/skills/mcp-builder
 ```
 
 ### チェック項目
 
-- [ ] `gh skill list` にインストールしたスキルが表示されること
+- [ ] `gh skill preview` で SKILL.md の中身を確認した
+- [ ] `ls .claude/skills/` にインストールしたスキルが表示されること
 - [ ] Claude Code の `/` 補完に当該スキルが現れること
+- [ ] `gh skill update <skill>` が metadata 質問なしで完走すること
 
 ---
 
