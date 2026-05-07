@@ -102,11 +102,7 @@ claude
 
 ## 2. UI仕様をもとに実装する（約30分｜経過 約45分）
 
-新しいセッションに切り替えたい場合、`/clear` でコンテキストをリセットしてください。タスク実行のクレジットを抑えるため、ここで Sonnet に切り替えます。
-
-```text
-/model sonnet
-```
+新しいセッションに切り替えたい場合、`/clear` でコンテキストをリセットしてください。(opusplanが適用されている場合、実装はsonnetになります)
 
 以下のプロンプトで実装を開始します。AIがフェーズに分けて進めます。フェーズ数や粒度は毎回多少異なっても問題ありません。
 
@@ -132,43 +128,25 @@ claude
 > [!WARNING]
 > `/simplify` はユーザー確認なしで自動修正まで進みます。実行前に `git status` で対象差分を把握し、`git restore` で戻せる状態にしておきます（コミット前に走らせるのが安全です）。
 
-## 3. ハーネスの強化（約5分｜経過 約50分）
+## 3. ハーネスの強化のためのTips（約5分｜経過 約50分）
 
-Claude Code には CLAUDE.md とは別に `.claude/rules/` という仕組みがあり、ルールをトピック単位の Markdown ファイルに分割できます。最大の特徴は YAML frontmatter の `paths:` で glob を指定すると、**マッチするファイルを編集中のときだけそのルールが自動でロードされる** こと。常時ロードの CLAUDE.md と違い、関連する場面だけコンテキストに乗せられます。
+Claude Codeの仕様はClaude Codeに聞いても不正確なことが多いです。
 
-仕様の確認は公式サブエージェント `claude-code-guide` に任せます。`/clear` で新しいセッションを開いて、以下を尋ねます。
+例えばClaude Code には CLAUDE.md とは別に `.claude/rules/` という仕組みがあり、ルールをトピック単位の Markdown ファイルに分割できます。最大の特徴は YAML frontmatter の `paths:` で glob を指定すると、マッチするファイルを編集中のときだけそのルールが自動でロードされる こと。常時ロードの CLAUDE.md と違い、関連する場面だけコンテキストに乗せられます。
+
+仕様の確認は公式サブエージェント `claude-code-guide` を利用します。これは自動で発火するケースが少なく、明示呼び出しする場合があります。`/clear` で新しいセッションを開いて、以下を尋ねます。
 
 ```text
 claude-code-guide サブエージェントを使って、`.claude/rules/` の仕様を教えてください。
 特に YAML frontmatter の `paths:` でパスを絞り込む書き方と、CLAUDE.md との使い分けを知りたいです。
 ```
 
-返ってきた回答を読み、以下を自分の言葉で説明できるか確認します。
-
-- `paths:` の glob にマッチするファイルを触っているときだけロードされる仕組み
-- `paths:` を書かないと CLAUDE.md と同様に常時ロードになること
-- プロジェクト (`.claude/rules/`) とユーザーグローバル (`~/.claude/rules/`) の両方が読まれること
-
-確認できたら、このプロジェクト向けの rule を 1 ファイル追加してみます。例として `.claude/rules/streamlit.md` を作り、`pages/**/*.py` と `app.py` を触っているときだけ Streamlit 固有の注意が読み込まれるようにします。
-
-```markdown
----
-paths:
-  - "pages/**/*.py"
-  - "app.py"
----
-
-# Streamlit ルール
-
-- ページ間で値を共有するときは `st.session_state` を使う
-- DB クエリなど重い処理は `@st.cache_data` でキャッシュする
-- データフレームを表示するときは `st.dataframe` の `column_config` で型指定する
-```
+返ってきた回答をコンテキストに、ルールの作成を依頼をすると、正確に作成が可能です。
 
 #### チェック項目
 
-- [ ] `claude-code-guide` の回答で `paths:` glob による条件付きロードの仕組みが説明されていることを確認した
-- [ ] `.claude/rules/<name>.md` を 1 ファイル追加し、`paths:` でこのプロジェクトの一部に絞り込めている
+- [ ] Claude Codeの仕様はハルシネーションしやすい
+- [ ] CLAUDE.md / `settings.json` / `.claude/rules/` の使い分けを説明できる
 
 ## 4. グラフクリックによるセンサー値連動を実装する（約10分｜経過 約60分）
 
@@ -258,12 +236,6 @@ uv run streamlit run app.py
 > プラグインはユーザーグローバル領域（`~/.config/claude/plugins/`）に入ります。プロジェクトの `.claude/settings.json` には影響しないため、他の章にも横断して利用できます。
 
 ### 6.2. `/feature-dev` で設備比較ビューを依頼する
-
-タスクの規模が大きいので、Opus に切り替えます。
-
-```text
-/model opus
-```
 
 `/feature-dev` を発火し、新規ページの実装を依頼します。
 
