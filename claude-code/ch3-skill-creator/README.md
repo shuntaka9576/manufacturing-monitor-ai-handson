@@ -193,7 +193,25 @@ skill-creator はここから **LLM as a Judge** という方式で評価を回�
 
 #### eval-viewer で結果を確認する
 
-skill-creator は `eval-viewer/generate_review.py` を実行し、評価結果をブラウザで確認できる HTML を出力します。Outputs タブで、各テストケースのプロンプトと、スキル付き Claude が生成した日報本文を並べて確認できます。
+skill-creator は `eval-viewer/generate_review.py` を実行し、評価結果をブラウザで確認できる HTML を出力します。**最初に Benchmark タブを開いて定量結果を確認し、そのあとで Outputs タブの個別出力を見る**順序が効率的です（マクロで合否傾向を掴んでからミクロで原因を探る）。
+
+##### 1. Benchmark タブで全体感を掴む
+
+最上部の集計表で **WITH SKILL と WITHOUT SKILL の Pass Rate / Time / Tokens** を比較します。Delta（差分）が小さければスキルの効きが弱い、大きければスキルが価値を出している、というシグナルです。さらに Per-Eval Breakdown で各テストケースの合否、ASSERTION 表で個別チェック項目の ✓/✗、最下部の Analysis Notes で skill-creator のサマリ所感が読めます。
+
+![eval-viewer Benchmark タブ: Pass Rate / Time / Tokens の WITH vs WITHOUT 比較表、ケース別の Pass Rate、アサーションごとの ✓/✗、Analysis Notes](./images/eval-viewer-benchmark.png)
+
+Per-Eval Breakdown に並ぶ 3 つの eval はそれぞれ別の「言い回しのバリエーション」をテストしています。プロンプトと意図のマッピングを把握しておくと、どのケースが落ちたときに何を疑えばよいかが分かります。
+
+| eval 名               | プロンプト                                                           | テスト意図                                                           |
+| --------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| default-date-report   | 「3月7日の日報を作成して」                                           | 日付を日本語（M月D日）で指定した場合に正しく解釈して使えるか         |
+| custom-date-report    | 「2026-03-08の設備稼働レポートを出力してほしい」                     | デフォルト以外の日付（ISO 形式）を指定した場合に正しく処理できるか   |
+| explicit-default-date | 「工場の日次オペレーションレポートを作って。デフォルトの日付でいい」 | 日付を明示せず「デフォルトで」と言った場合に 2026-03-07 が使われるか |
+
+##### 2. Outputs タブで個別ケースを精査する
+
+Benchmark で気になったケース（特に WITHOUT が落ちて WITH が通っているもの）を Outputs タブで開き、プロンプトと出力本文を確認します。
 
 ![eval-viewer Outputs タブ: プロンプトと、スキル付き Claude が生成した Markdown 日報の出力本文が表示される](./images/eval-viewer-output.png)
 
