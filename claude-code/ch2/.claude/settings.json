@@ -5,8 +5,33 @@
       "Bash(python *)",
       "Bash(python3 *)",
       "Bash(pip *)",
-      "Bash(pip3 *)"
-    ]
+      "Bash(pip3 *)",
+      "Bash(rm:*)",
+      "Bash(sudo:*)",
+      "Bash(bash -c:*)",
+      "Read(//**/.env*)",
+      "Read(//**/id_rsa*)",
+      "Read(//**/id_ed25519*)",
+      "Read(//**/*.pem)",
+      "Edit(//**/.env*)",
+      "Edit(//**/id_rsa*)",
+      "Edit(//**/id_ed25519*)",
+      "Edit(//**/*.pem)",
+      "Write(//**/.env*)",
+      "Write(//**/id_rsa*)",
+      "Write(//**/id_ed25519*)",
+      "Write(//**/*.pem)"
+    ],
+    "ask": [
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(scp:*)",
+      "Bash(sftp:*)",
+      "Bash(ftp:*)",
+      "Bash(telnet:*)",
+      "Bash(rsync:*)"
+    ],
+    "disableBypassPermissionsMode": "disable"
   },
   "statusLine": {
     "type": "command",

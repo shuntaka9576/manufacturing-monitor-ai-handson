@@ -67,6 +67,7 @@
     "textlintrc",
     "timespec",
     "tobytes",
+    "valueformat",
     "venv",
     "vline",
     "winget",

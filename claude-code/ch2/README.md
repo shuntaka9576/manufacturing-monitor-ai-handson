@@ -129,7 +129,7 @@ claude
 ```text
 `docs/implement-snapshot/dashboard-spec.md` に記載された実装フェーズに沿って、まずはフェーズ1を実装してください。動作確認方法も教えてください。
 
-完了したタスクは TodoWrite で進捗管理してください。動作確認はこちらで行います。問題なかったかAskUserQuetionで聞いてください。
+完了したタスクは TodoWrite で進捗管理してください。動作確認はこちらで行います。問題なかったかAskUserQuestionで聞いてください。
 
 `docs/implement-snapshot/dashboard-spec.md` の該当チェックボックスを `- [x]` に更新してください。
 ```
@@ -141,7 +141,7 @@ claude
 
 確認できました。次のフェーズに進んでください。
 
-動作確認はこちらで行います。問題なかったかAskUserQuetionで聞いてください。
+動作確認はこちらで行います。問題なかったかAskUserQuestionで聞いてください。
 ```
 
 フェーズごとに動作確認を行い、コンソールに表示されたエラーをClaude Codeにながし、問題がなければ次のフェーズに進む流れを繰り返します。
