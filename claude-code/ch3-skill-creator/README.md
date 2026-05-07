@@ -415,8 +415,7 @@ rm -rf .claude/skills/mcp-builder
 
 ## Phase 4: まとめ
 
-- 公式マケプレ（`/plugin install`）が第一選択。Anthropic 公式のスキルはこれで入る
-- GitHub の任意リポジトリのスキルは `gh skill` で pin 導入
-- スキルは「作る → 出す → 直す → 対話化」のサイクルで育てる。初版で完璧を狙わず、Progressive Disclosure を意識した 2 パス構造で改善する
-
-どちらの導入方法を使っても最終的には `.claude/skills/<name>/SKILL.md` が配置され、Claude Code から同じ使い心地になります。配布元と管理粒度で使い分けてください。
+- スキル開発の核は **評価ループ**。LLM as a Judge で採点 → SKILL.md を書き直し、を繰り返して育てる
+- SKILL.md 本文は短く保ち、SQL や具体ロジックは `scripts/`、仕様情報は `references/`、テンプレートは `assets/` に退避する。これらは本文から参照された時だけ読み込まれるので、起動時の context を圧迫しない（skill-creator がこの構造で出力する）
+- 対話化したい判断ポイントには `AskUserQuestion` を組み込み、AI に独断させない安全な分岐を作る
+- 外部スキルを管理するツール（`gh skill` など）も登場し、エコシステムが広がりつつある
