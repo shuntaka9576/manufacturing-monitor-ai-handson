@@ -179,7 +179,31 @@ Claude Code で以下を入力します。
 - 実装先: .claude/skills/daily-operations-report/ 配下
 ```
 
-skill-creator が対話でヒアリングしてきたら、あえて最小限の情報だけ答えて先に進めます（わざと粗い初版を作るため）。
+次のフェーズに進む
+
+> AI: 次のステップとして、テストケースを作って評価ループを回すこともできますが、どうしますか？
+
+```text
+お願いします。
+```
+
+skill-creator はここから **LLM as a Judge** という方式で評価を回します。テストプロンプトをスキル付き Claude に投げて出力を集め、それを別の LLM（Judge）が `expected_output` と照合してスコアと指摘を返します。Judge 自身も LLM なので自然文の出力でも採点でき、その結果が SKILL.md 改善のインプットになるのが肝です。
+
+![LLM as a Judge: evals.json のテストケースをスキル実行に投げ、出力を別の LLM Judge が rubric と照合してスコア + フィードバックを返し、SKILL.md 改善ループに戻る](./images/llm-as-a-judge.png)
+
+#### eval-viewer で結果を確認する
+
+skill-creator は `eval-viewer/generate_review.py` を実行し、評価結果をブラウザで確認できる HTML を出力します。Outputs タブで、各テストケースのプロンプトと、スキル付き Claude が生成した日報本文を並べて確認できます。
+
+![eval-viewer Outputs タブ: プロンプトと、スキル付き Claude が生成した Markdown 日報の出力本文が表示される](./images/eval-viewer-output.png)
+
+下部にはアサーション一覧があり、Judge が rubric 各項目（必須セクションの有無、日付一致など）を ✓/✗ で自動採点した結果が並びます。さらに `YOUR FEEDBACK` 欄から人間のコメントを足し、両方を SKILL.md 改善のインプットにします。
+
+![eval-viewer アサーション結果: 必須セクションの存在チェック / 日付一致チェックなどが ✓ で表示され、下部に人間のフィードバック入力欄がある](./images/eval-viewer-assertions.png)
+
+eval-viewer には **3 prompts × 2 modes = 6 件** が並びます。WITHOUT SKILL は盲検 A/B 比較の片割れとして置かれており（`agents/comparator.md` の Blind Comparator がどちらがスキル付きか伏せて勝者を判定します）、フィードバックは原則 **WITH SKILL のみ** に書きます。WITHOUT を見て「想定以上に良い / 悪い」「Comparator の判定と感覚がズレる」と感じた時だけ、その違和感を書き残してください ── アサーション設計やスキル要否を見直すシグナルになります。
+
+各ケースを Next で送って全件レビューしたら **Submit All Reviews** で確定し、出力されたフィードバックを Claude Code に貼り戻して SKILL.md 改稿に進みます。
 
 #### 生成されたスキルを確認
 
