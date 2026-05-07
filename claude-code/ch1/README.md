@@ -1,4 +1,4 @@
-# ch1: Spec駆動開発 - プロジェクト基盤 & DB
+# ch1: 仕様駆動開発 - プロジェクト基盤 & DB
 
 ## 概要
 
@@ -14,11 +14,23 @@ Excelファイル（`sample_data.xlsx`）が用意されています。こちら
 
 ## 体験すること（約10分｜経過 約10分）
 
-Claude Code に **[spec-kit](https://github.com/github/spec-kit)** を組み込み、製造設備モニタリングダッシュボードのデータ基盤を構築します。`@sample_data.xlsx` を入力に、constitution で AI の過剰生成を縛ったうえで spec → plan → tasks → implement と段階的に詰めていきます（詳細フローは [§1 冒頭の図](#1-spec駆動開発で-seedpy-を作る約40分経過-約40分) を参照）。
+Claude Code に **[spec-kit](https://github.com/github/spec-kit)** を組み込み、製造設備モニタリングダッシュボードのデータ基盤を構築します。`@sample_data.xlsx` を入力に、constitution で AI の過剰生成を縛ったうえで spec → plan → tasks → implement と段階的に詰めていきます（詳細フローは [§1 冒頭の図](#1-仕様駆動開発で-seedpy-を作る約40分経過-約40分) を参照）。
 
-## Spec駆動開発について
+## 仕様駆動開発について
 
-### Spec駆動開発の課題
+### 概要
+
+**仕様駆動開発（SDD: Spec-Driven Development）** は、コードを書き始める前に「何を / なぜ / どう作るか」を文書として固め、それを単一の真実として実装まで通すアプローチ。AI コーディングと組み合わせる文脈では、`spec.md / plan.md / tasks.md` のような構造化ドキュメントを生成・更新しながら段階的に詰めていく流れが定型になりつつある。
+
+代表的な実装としては次のようなものがある。
+
+- **[spec-kit](https://github.com/github/spec-kit)** — GitHub 公式の SDD フレームワーク。スラッシュコマンド (`/speckit-*`) で各工程を駆動する。本章で使用
+- **[Kiro](https://kiro.dev/)** — AWS が提供する SDD 寄り IDE。spec / steering といった概念をエディタ自体に組み込んでいる
+- **[cc-sdd](https://github.com/gotalab/cc-sdd)** — Claude Code / Codex / Cursor など複数エージェントに対応した SDD ハーネス
+
+以下、本章では spec-kit を題材に SDD を実体験する。
+
+### 仕様駆動開発の課題
 
 - 工程が重くなる — Spec 作成・レビュー・コードとの同期で、開発リソースが大きく取られる
 - 守られるとは限らない — LLM の出力は確率的で、Spec どおりの実装は保証されない。検証は結局人間が担う
@@ -38,13 +50,13 @@ graph LR
 
 ### 合意量で位置づけ、ハンズオンで体験する意味
 
-合意量の観点で見ると、Zero-shot / Plan-Then-Execute / Spec駆動 は どれだけ事前に合意してから実装するかの度合いが違うだけで、**直線上に並ぶ連続的な選択肢**だ。AI モデルが賢くなるほど、必要な合意量は減る方向に動く。
+合意量の観点で見ると、Zero-shot / Plan-Then-Execute / 仕様駆動開発 は どれだけ事前に合意してから実装するかの度合いが違うだけで、**直線上に並ぶ連続的な選択肢**だ。AI モデルが賢くなるほど、必要な合意量は減る方向に動く。
 
 <!-- 画像生成プロンプト:
 "Clean horizontal spectrum diagram. A single horizontal axis from left to right with three labeled positions:
 - Left (around 10%): 'Zero-shot' / subtitle '雑な指示 → AI が一発生成'
 - Middle (around 50%): 'Plan-Then-Execute' / subtitle '計画 → 実装、対話で都度補正'
-- Right (around 90%): 'Spec駆動 (spec-kit)' / subtitle '仕様 → 設計 → タスクを固めてから実装'
+- Right (around 90%): '仕様駆動 (spec-kit)' / subtitle '仕様 → 設計 → タスクを固めてから実装'
 Axis label below: '実装前の合意量: 少 → 多'.
 Below the main axis, a smaller secondary arrow labeled 'AI モデルが賢くなるほど中庸点が左へシフト' pointing left.
 Flat design, corporate muted palette (navy, teal, warm amber accent), 16:9, clean sans-serif, white background, no extraneous decoration."
@@ -59,7 +71,7 @@ Flat design, corporate muted palette (navy, teal, warm amber accent), 16:9, clea
 
 なお、同じ Plan-Then-Execute でも、計画を細かく詰めずに一度実装させ、出来たものを見て修正指示で詰めていくやり方の方が早いケースは多い。プロトタイプや小規模変更では、合意を固めるより試行サイクルを多く回す方がフィードバックを得やすく、結果的に短い時間で着地する。
 
-自分が担当する案件・チーム・モデル世代において、**この直線のどのあたりが最前線（コストとリターンが釣り合う点）か**は、両端を知らないと見極められない。Spec駆動を一度実体験しておくことで、「ここまで合意を固める価値があるか／もっと軽くしてよいか」を肌感覚で判断できるようになる。加えて SDD 自体、次のような場面では今でも有効に機能する手法だ。
+自分が担当する案件・チーム・モデル世代において、**この直線のどのあたりが最前線（コストとリターンが釣り合う点）か**は、両端を知らないと見極められない。仕様駆動開発を一度実体験しておくことで、「ここまで合意を固める価値があるか／もっと軽くしてよいか」を肌感覚で判断できるようになる。加えて SDD 自体、次のような場面では今でも有効に機能する手法だ。
 
 <!-- 画像生成プロンプト:
 "Two-row conceptual comparison diagram showing how a framework normalizes user input before AI amplification.
@@ -81,6 +93,7 @@ Clean diagrammatic style, corporate muted palette (navy, teal, warm amber accent
 そして spec-kit というフレームワーク自体にも、Plan-Then-Execute では得にくい次の利点がある。
 
 - **進め方をフレームワークが引き受ける** — 要件 → 質問 → 設計 → タスク → 実装の順序が固定済み。「次に何を聞くか / どこまで決めるか / いつ実装に入るか」をユーザーが毎回設計しなくていいので、中身の判断に集中できる
+- **プロンプトの骨格をコマンド側が持つ** — Plan-Then-Execute だと「何を / どの観点から / どの順序で聞くか」を毎回プロンプトに書き起こす必要がある。一方 spec-kit は `/speckit-*` 各コマンドにテンプレート・問いかけ・出力形式が内蔵されており、ざっくりした 1 段落の seed を渡すだけで済む。さらに生成物（spec / plan / tasks）はリポジトリに残るため、入力と経緯の両面が定型化される
 - **抜け漏れが計画前に必ず出る** — `/speckit-clarify` が計画ステップの**前段に固定**されている。AI に「質問して」と頼めば質問は来るが、それは計画の補足。spec-kit では設計入力として組み込まれているので、AI が勝手に仮定して進める前に欠損を出させられる
 - **ロングタームなタスクで効く** — spec / plan / tasks がリポジトリに残るため、複数セッション・複数担当にまたがる中〜長期の work で「会話履歴に依存しない引き継ぎ」ができる。次の人（または次の自分）が会話を遡らなくても再開できる
 
@@ -108,7 +121,7 @@ uv sync
 claude
 ```
 
-## 1. Spec駆動開発で seed.py を作る（約40分｜経過 約40分）
+## 1. 仕様駆動開発で seed.py を作る（約40分｜経過 約40分）
 
 ch1 には spec-kit が事前に組み込まれています（`.specify/` と `.claude/skills/` がコミット済み）。`/help` で各 `/speckit-*` コマンドが見えれば OK です。
 
@@ -170,7 +183,7 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 実行すると `specs/NNN-*/spec.md` が作成されます。内容をレビューしてください。`NEEDS CLARIFICATION` マーカーが残っていても問題ありません。次の `/speckit-clarify` で潰します。
 
 > [!NOTE]
-> spec-kit 公式ガイドでは `/speckit-specify` で「Do not focus on the tech stack at this point」とされています。WHAT/WHY と HOW を明確に分離するのが Spec 駆動の肝です。
+> spec-kit 公式ガイドでは `/speckit-specify` で「Do not focus on the tech stack at this point」とされています。WHAT/WHY と HOW を明確に分離するのが仕様駆動開発の肝です。
 
 #### チェック項目
 
