@@ -43,6 +43,7 @@
     "notna",
     "numpy",
     "openpyxl",
+    "opusplan",
     "pathlib",
     "pfnet",
     "plamo",

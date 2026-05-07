@@ -7,5 +7,10 @@
       "Bash(pip *)",
       "Bash(pip3 *)"
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "uv run python .claude/scripts/statusline.py",
+    "padding": 0
   }
 }
