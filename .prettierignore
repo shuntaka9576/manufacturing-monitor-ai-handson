@@ -9,3 +9,6 @@ works/
 **/.specify/
 **/.claude/skills/speckit-*/
 claude-code/ch1/CLAUDE.md
+
+# AI 生成の技術仕様書（コード例やAPI名が含まれるため lint 不要）
+**/docs/implement-snapshot/
