@@ -151,8 +151,6 @@ graph TD
 
 過剰な機能・抽象化を抑える原則を `.specify/memory/constitution.md` に書き出します。spec-kit は以降のステップでこの原則を参照し、AI の生成を縛ります。
 
-**実行モード: plan モード**（`shift+tab` でプロンプト下部の表示を `plan mode on` に切り替え）。Claude が原則 draft を提示 → `ExitPlanMode` 承認後に `.specify/memory/constitution.md` へ書き込みます。以降 1.5 まで同じ運用です。
-
 ```text
 /speckit-constitution
 このプロジェクトの全機能・全変更で守る原則を定めます。AI に過剰な機能・抽象化を生成させないため、以下を厳守してください。
@@ -171,7 +169,6 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 `/speckit-specify` は **WHAT（何を作るか）と WHY（なぜ作るか）** のみを記述するステップです。技術スタックやディレクトリ構成といった HOW は次の `/speckit-plan` に委ねます。ここでは詳細を書き込まず、ざっくりした 1 段落だけ渡します。曖昧な部分は次の `/speckit-clarify` で対話的に埋めるので、最初から完璧な文章を書こうとしなくて構いません。
 
-**実行モード: plan モード**（Claude が spec の構成案を提示 → 承認後に `specs/NNN-*/spec.md` へ書き込み）。
 
 ```text
 /speckit-specify
@@ -195,7 +192,6 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 `/speckit-specify` を最小限の文章で済ませた分、ここで対話的に詳細を詰めます。`spec.md` の `NEEDS CLARIFICATION` や曖昧な箇所を Claude が質問形式で投げてくるので、回答すると spec.md が更新されます。`/speckit-plan` 前に通すことで手戻りを減らします。
 
-**実行モード: plan モード**（質疑応答で回答を集めたうえで spec.md 更新案を提示 → 承認後に書き込み）。
 
 ```text
 /speckit-clarify
@@ -213,7 +209,6 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 ここから HOW を指示します。`/speckit-specify` から外した技術スタック・配置・DDL 設計をまとめて渡します。
 
-**実行モード: plan モード**（アーキテクチャ・スキーマ案を提示 → 承認後に `specs/*/plan.md` へ書き込み）。
 
 ```text
 /speckit-plan
@@ -245,7 +240,6 @@ CREATE TABLE は `@sample_data.xlsx` のカラム・型に準拠して設計し�
 
 ### 1.5. Tasks: `/speckit-tasks` でタスク分解
 
-**実行モード: plan モード**（タスク分解案を提示 → 承認後に `specs/*/tasks.md` へ書き込み）。
 
 ```text
 /speckit-tasks
