@@ -73,22 +73,8 @@ Flat design, corporate muted palette (navy, teal, warm amber accent), 16:9, clea
 
 自分が担当する案件・チーム・モデル世代において、**この直線のどのあたりが最前線（コストとリターンが釣り合う点）か**は、両端を知らないと見極められない。仕様駆動開発を一度実体験しておくことで、「ここまで合意を固める価値があるか／もっと軽くしてよいか」を肌感覚で判断できるようになる。加えて SDD 自体、次のような場面では今でも有効に機能する手法だ。
 
-<!-- 画像生成プロンプト:
-"Two-row conceptual comparison diagram showing how a framework normalizes user input before AI amplification.
-Top row labeled 'Plan-Then-Execute (直接渡し)':
-- Three different-sized arrows on the left (representing varied prompt quality from different users) all pointing into a stylized 'AI 増幅器' icon (megaphone/speaker shape).
-- Output side shows three different-sized arrows of varying quality.
-Bottom row labeled 'spec-kit (フレームワーク経由)':
-- Same three different-sized input arrows pointing first into a 'Framework (spec / plan / tasks)' box (depicted as a structured sieve/filter).
-- After the framework, three uniform-sized arrows enter the 'AI 増幅器' icon.
-- Output side shows three uniform-sized output arrows.
-Clean diagrammatic style, corporate muted palette (navy, teal, warm amber accent), 16:9, clean sans-serif, white background."
--->
-
 - **複数チーム・オフショア・非同期コラボレーション** — 会話履歴や Slack ログに依存できない環境で、リポジトリに残る仕様が引き継ぎ資料として機能する
 - **AI コーディング経験の浅いメンバーで構成されたチーム** — フレームワークが「次に何を決めるか」を強制してくれるので、ガードレールとして機能する
-
-![フレームワークが入力を正規化してから AI に渡す](images/framework_filter.png)
 
 そして spec-kit というフレームワーク自体にも、Plan-Then-Execute では得にくい次の利点がある。
 
@@ -117,8 +103,16 @@ uv sync
 
 ### 0.2. Claude Code を起動
 
+effort level を `medium` に下げて起動します。Opus のデフォルト `high` よりクレジット消費を抑えつつ、本ハンズオンの設計・実装には十分です。
+
 ```bash
-claude
+claude --effort medium
+```
+
+起動したら、序盤でモデルを `opusplan` に切り替えます。plan モード中は Opus、それ以外（`/speckit-implement` の実装フェーズなど）は Sonnet で動くハイブリッド設定で、設計品質と実装コストを両立できます。
+
+```text
+/model opusplan
 ```
 
 ## 1. 仕様駆動開発で seed.py を作る（約40分｜経過 約40分）
@@ -147,6 +141,25 @@ graph TD
     style F fill:#efe,stroke:#3a3,stroke-width:1px
 ```
 
+<!-- 画像生成プロンプト:
+"Two-row conceptual comparison diagram showing how a framework normalizes user input before AI amplification.
+Top row labeled 'Plan-Then-Execute (直接渡し)':
+- Three different-sized arrows on the left (representing varied prompt quality from different users) all pointing into a stylized 'AI 増幅器' icon (megaphone/speaker shape).
+- Output side shows three different-sized arrows of varying quality.
+Bottom row labeled 'spec-kit (フレームワーク経由)':
+- Same three different-sized input arrows pointing first into a 'Framework (spec / plan / tasks)' box (depicted as a structured sieve/filter).
+- After the framework, three uniform-sized arrows enter the 'AI 増幅器' icon.
+- Output side shows three uniform-sized output arrows.
+Clean diagrammatic style, corporate muted palette (navy, teal, warm amber accent), 16:9, clean sans-serif, white background."
+-->
+
+![フレームワークが入力を正規化してから AI に渡す](images/framework_filter.png)
+
+> [!IMPORTANT]
+> **constitution の後、各ステップに入る前に `/clear` します。** spec-kit は作業中の仕様を `.specify/feature.json` に、決定内容を `spec.md / plan.md / tasks.md` にディスク保存します。各 `/speckit-*` コマンドは起動時にこれらを読み直すため、会話履歴が無くても前工程の結果を引き継げます。`/clear` を挟むことで「会話ではなく成果物が単一の真実」という SDD の継続性を体感でき、コンテキストの肥大も防げます。
+>
+> モデル（`opusplan`）と effort（`medium`）は `/clear` しても維持されます。ただし plan モードは解除されることがあるので、§1.2〜§1.5 では `/clear` 後にプロンプト下部の表示を確認し、`plan mode on` でなければ `shift+tab` で入れ直してください。
+
 ### 1.1. Constitution: `/speckit-constitution` で AI に制約を課す
 
 過剰な機能・抽象化を抑える原則を `.specify/memory/constitution.md` に書き出します。spec-kit は以降のステップでこの原則を参照し、AI の生成を縛ります。
@@ -169,6 +182,7 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 `/speckit-specify` は **WHAT（何を作るか）と WHY（なぜ作るか）** のみを記述するステップです。技術スタックやディレクトリ構成といった HOW は次の `/speckit-plan` に委ねます。ここでは詳細を書き込まず、ざっくりした 1 段落だけ渡します。曖昧な部分は次の `/speckit-clarify` で対話的に埋めるので、最初から完璧な文章を書こうとしなくて構いません。
 
+> **まず `/clear`。** `plan mode on` が消えていたら `shift+tab` で plan モードに戻してから実行します。
 
 ```text
 /speckit-specify
@@ -192,6 +206,7 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 `/speckit-specify` を最小限の文章で済ませた分、ここで対話的に詳細を詰めます。`spec.md` の `NEEDS CLARIFICATION` や曖昧な箇所を Claude が質問形式で投げてくるので、回答すると spec.md が更新されます。`/speckit-plan` 前に通すことで手戻りを減らします。
 
+> **まず `/clear`。** `plan mode on` が消えていたら `shift+tab` で plan モードに戻してから実行します。
 
 ```text
 /speckit-clarify
@@ -209,37 +224,29 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 ここから HOW を指示します。`/speckit-specify` から外した技術スタック・配置・DDL 設計をまとめて渡します。
 
+> **まず `/clear`。** `plan mode on` が消えていたら `shift+tab` で plan モードに戻してから実行します。
 
 ```text
 /speckit-plan
-技術スタックは Python 3.12 / SQLite / openpyxl を使用してください。
+このステップは設計のみ。実装・実行はしないでください（実コードは /speckit-implement で書きます）。
 
-## ディレクトリ構成
+技術スタックは Python 3.12 / SQLite / openpyxl を使用してください。スクリプトは db/ 配下、生成される DB は data/（.gitignore 済み）に置く想定です。
 
-- data/factory.db （生成物。.gitignore 対象）
-- db/schema.sql （DDL）
-- db/seed.py （Excel 読み込み + INSERT）
-- db/connection.py （接続ヘルパー）
-
-## DBスキーマ
-
-CREATE TABLE は `@sample_data.xlsx` のカラム・型に準拠して設計してください。equipment / sensor_readings / status_logs の3テーブルと、(equipment_id, timestamp) の複合インデックスを作成します。
-
-## 動作確認
-
-`uv sync && uv run python db/seed.py` で投入できる状態にしてください。
+テーブル設計（スキーマ・型・インデックス）と seed の構成は、spec.md と @sample_data.xlsx の実データから設計してください。最終的に `uv sync && uv run python db/seed.py` で投入できる構成を計画します（この段階では実行しません）。
 ```
 
 `specs/*/plan.md` が生成されます。
 
 #### チェック項目
 
-- [ ] アーキテクチャ図・モジュール分割・処理フローが妥当か確認
-- [ ] CREATE TABLE 文が `@sample_data.xlsx` のシート仕様と整合していること
-- [ ] `data/factory.db` / `db/schema.sql` / `db/seed.py` / `db/connection.py` の生成計画が含まれていること
+- [ ] `plan.md` に技術スタック・スキーマ設計・処理フローが記述され、`spec.md` の要件と整合していること
+- [ ] CREATE TABLE 設計が `@sample_data.xlsx` のシート仕様（3エンティティ・設備タイプごとに疎なセンサー項目）と整合していること
+- [ ] インデックスやファイル分割などの設計判断が spec の利用シナリオに対して妥当か（不足があればレビューで指摘し plan を更新する）
+- [ ] 実コード（`schema.sql` / `seed.py` 等）はまだ生成されていないこと — このステップは設計のみ
 
 ### 1.5. Tasks: `/speckit-tasks` でタスク分解
 
+> **まず `/clear`。** `plan mode on` が消えていたら `shift+tab` で plan モードに戻してから実行します。
 
 ```text
 /speckit-tasks
@@ -249,12 +256,13 @@ CREATE TABLE は `@sample_data.xlsx` のカラム・型に準拠して設計し�
 
 ### 1.6. Implement: `/speckit-implement` で実装
 
-**実行モード: plan モードを解除して通常モード**（`shift+tab` で `plan mode on` 表示を消した状態）。`/speckit-implement` は `tasks.md` を上から順に実行し、ファイル書き込み・コマンド実行が連続するため、plan モードでは毎タスクで承認待ちが発生します。承認の手間を更に減らしたい場合は、もう一度 `shift+tab` を押して **auto-accept モード**（プロンプト下部の表示が `auto-accept edits on`）にしてください。
+ここでも実行前に `/clear` します。**会話履歴ゼロの状態から、`tasks.md` / `plan.md` / `spec.md` だけを読んで実装が走る**ことを確認できる、SDD の継続性が最もはっきり見える場面です。
 
-タスク実行のクレジット消費を抑えるため、ここでモデルを Sonnet に切り替えます。
+**実行モード: 通常モードで開始します**（`/clear` 直後は plan モードが解除されています）。`/speckit-implement` は `tasks.md` を上から順に実行し、ファイル書き込み・コマンド実行が連続します。承認の手間を減らしたい場合は `shift+tab` で **auto-accept モード**（プロンプト下部の表示が `auto-accept edits on`）にしてください。
+
+`/model opusplan` のままなら、plan モード外の実装フェーズは自動的に Sonnet で動くため、ここでのモデル切り替えは不要です。
 
 ```text
-/model sonnet
 /speckit-implement
 ```
 
@@ -297,7 +305,7 @@ PRAGMA foreign_key_list(status_logs);
 ```
 
 > [!NOTE]
-> AIの出力により、DBファイルのパスやテーブル名が異なる場合があります。実際に生成されたコードに合わせて読み替えてください。
+> AIの出力により、ファイル構成（`db/connection.py` の有無など）・DBファイルのパス・テーブル名が異なる場合があります。plan プロンプトを設計指示だけに絞っているぶん、Constitution（Simplicity / Speed）に沿って 1 ファイルにまとまるなどの差が出ます。実際に生成されたコードに合わせて読み替えてください。
 
 ## 3. 時間が余ったら
 
@@ -320,3 +328,19 @@ AIが生成したテストは冗長になりがちです。生成された `test
 ```
 
 生成されたSQLを `sqlite3 data/factory.db` で実行し、結果を確認してみてください。
+
+### 3.3. zero-shot と比較してメリ・デメを体感する
+
+仕様駆動の効果を実感するため、同じ要件を **zero-shot（一発生成）** で作らせて見比べます。新しいセッション（または `/clear`）で、仕様や段階を与えず、一段落だけ渡します。
+
+```text
+sample_data.xlsx を読んで、製造設備モニタリング用に設備マスタ・センサー時系列・ステータス変更履歴の3テーブルを作る schema.sql と、データを投入する seed.py を一発で作ってください。
+```
+
+生成物を SDD 版と比べ、特に `/speckit-clarify` で人間に確認した次の3点を、AI がどう「勝手に」決めたかを観察してください。
+
+- 再実行の冪等性（全削除→再投入 / upsert / 何もしない、のどれを選んだか）
+- 不正・孤立行の扱い（即停止 / スキップ / 無検証）
+- 冗長な「設備名」列（正規化したか、各レコードに持たせたか）
+
+**メリット**: SDD はこれらの判断を実装前に表へ出させ、`spec.md` に記録として残す。**デメリット**: 一発生成なら数十秒で動くものに、constitution → spec → clarify → plan → tasks → implement と工程を要する。タスクの確定度・寿命・引き継ぎ要否によって、どちらが見合うかを判断する目安になります。
