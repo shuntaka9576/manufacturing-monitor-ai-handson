@@ -139,7 +139,7 @@ claude
 ```text
 @docs/implement-snapshot/dashboard-spec.md
 
-確認できました。次のフェーズに進んでください。
+確認できました。次の1つのフェーズに進んでください。
 
 動作確認はこちらで行います。問題なかったかAskUserQuestionで聞いてください。
 ```
