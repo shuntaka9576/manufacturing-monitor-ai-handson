@@ -141,24 +141,9 @@ graph TD
     style F fill:#efe,stroke:#3a3,stroke-width:1px
 ```
 
-<!-- 画像生成プロンプト:
-"Two-row conceptual comparison diagram showing how a framework normalizes user input before AI amplification.
-Top row labeled 'Plan-Then-Execute (直接渡し)':
-- Three different-sized arrows on the left (representing varied prompt quality from different users) all pointing into a stylized 'AI 増幅器' icon (megaphone/speaker shape).
-- Output side shows three different-sized arrows of varying quality.
-Bottom row labeled 'spec-kit (フレームワーク経由)':
-- Same three different-sized input arrows pointing first into a 'Framework (spec / plan / tasks)' box (depicted as a structured sieve/filter).
-- After the framework, three uniform-sized arrows enter the 'AI 増幅器' icon.
-- Output side shows three uniform-sized output arrows.
-Clean diagrammatic style, corporate muted palette (navy, teal, warm amber accent), 16:9, clean sans-serif, white background."
--->
+各コマンドがどの成果物ファイルを生成するかは次の図も参照してください。
 
-![フレームワークが入力を正規化してから AI に渡す](images/framework_filter.png)
-
-> [!IMPORTANT]
-> **constitution の後、各ステップに入る前に `/clear` します。** spec-kit は作業中の仕様を `.specify/feature.json` に、決定内容を `spec.md / plan.md / tasks.md` にディスク保存します。各 `/speckit-*` コマンドは起動時にこれらを読み直すため、会話履歴が無くても前工程の結果を引き継げます。`/clear` を挟むことで「会話ではなく成果物が単一の真実」という SDD の継続性を体感でき、コンテキストの肥大も防げます。
->
-> モデル（`opusplan`）と effort（`medium`）は `/clear` しても維持されます。ただし plan モードは解除されることがあるので、§1.2〜§1.5 では `/clear` 後にプロンプト下部の表示を確認し、`plan mode on` でなければ `shift+tab` で入れ直してください。
+![spec-kit: command → generated files](images/speckit_flow.png)
 
 ### 1.1. Constitution: `/speckit-constitution` で AI に制約を課す
 
