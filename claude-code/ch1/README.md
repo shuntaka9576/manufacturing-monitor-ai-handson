@@ -276,6 +276,7 @@ sqlite3 data/manufacturing.db
 ```
 
 (※ table名は違う可能性があります。確認してください。)
+
 ```sql
 .tables
 .schema equipment

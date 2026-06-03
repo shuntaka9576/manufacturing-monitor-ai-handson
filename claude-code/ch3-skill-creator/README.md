@@ -106,13 +106,11 @@ Anthropic 公式の `anthropics/skills` を marketplace として登録します
 
 ### 1.4. 認識確認（約1分）
 
-
 `/` を入力して補完候補に `skill-creator` が現れることも確認してください。
 
 ```text
 /skill-creator
 ```
-
 
 #### チェック項目
 
