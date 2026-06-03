@@ -269,12 +269,13 @@ uv run python db/seed.py
 uv run pytest -v
 ```
 
-sqlite3 CLIでデータを確認します。
+sqlite3 CLIでデータを確認します。(※ db名は違う可能性があります。確認してください。)
 
 ```bash
-sqlite3 data/factory.db
+sqlite3 data/manufacturing.db
 ```
 
+(※ table名は違う可能性があります。確認してください。)
 ```sql
 .tables
 .schema equipment
