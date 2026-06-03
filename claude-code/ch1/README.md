@@ -109,7 +109,7 @@ effort level を `medium` に下げて起動します。Opus のデフォルト 
 claude --effort medium
 ```
 
-起動したら、序盤でモデルを `opusplan` に切り替えます。plan モード中は Opus、それ以外（`/speckit-implement` の実装フェーズなど）は Sonnet で動くハイブリッド設定で、設計品質と実装コストを両立できます。
+起動したら、序盤でモデルを `opusplan` に切り替えます。本ハンズオンは全ステップ `accept edit on` で進めるため実質 Sonnet で動きますが、`opusplan` を入れておくと plan モードに入った場面だけ自動的に Opus に上がります。
 
 ```text
 /model opusplan
@@ -121,16 +121,16 @@ ch1 には spec-kit が事前に組み込まれています（`.specify/` と `.
 
 ```mermaid
 graph TD
-    A["/speckit-constitution<br/>plan mode"] -->|原則を定義| A1[(".specify/memory/<br/>constitution.md")]
-    A1 --> B["/speckit-specify<br/>plan mode"]
+    A["/speckit-constitution<br/>accept edit on"] -->|原則を定義| A1[(".specify/memory/<br/>constitution.md")]
+    A1 --> B["/speckit-specify<br/>accept edit on"]
     B -->|WHAT / WHY| B1[("specs/NNN-*/spec.md")]
-    B1 --> C["/speckit-clarify<br/>plan mode"]
+    B1 --> C["/speckit-clarify<br/>accept edit on"]
     C -->|曖昧性を解消し更新| B1
-    B1 --> D["/speckit-plan<br/>plan mode"]
+    B1 --> D["/speckit-plan<br/>accept edit on"]
     D -->|HOW / 技術設計| D1[("specs/NNN-*/plan.md")]
-    D1 --> E["/speckit-tasks<br/>plan mode"]
+    D1 --> E["/speckit-tasks<br/>accept edit on"]
     E -->|タスク分解| E1[("specs/NNN-*/tasks.md")]
-    E1 --> F["/speckit-implement<br/>通常 / auto-accept"]
+    E1 --> F["/speckit-implement<br/>accept edit on"]
     F -->|実装| F1[("db/schema.sql<br/>db/seed.py 等")]
 
     style A fill:#eef,stroke:#33c,stroke-width:1px
@@ -148,6 +148,8 @@ graph TD
 ### 1.1. Constitution: `/speckit-constitution` で AI に制約を課す
 
 過剰な機能・抽象化を抑える原則を `.specify/memory/constitution.md` に書き出します。spec-kit は以降のステップでこの原則を参照し、AI の生成を縛ります。
+
+> 実行モードは `accept edit on`（下部表示で確認、違っていれば `shift+tab` で切り替え）。
 
 ```text
 /speckit-constitution
@@ -167,7 +169,7 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 `/speckit-specify` は **WHAT（何を作るか）と WHY（なぜ作るか）** のみを記述するステップです。技術スタックやディレクトリ構成といった HOW は次の `/speckit-plan` に委ねます。ここでは詳細を書き込まず、ざっくりした 1 段落だけ渡します。曖昧な部分は次の `/speckit-clarify` で対話的に埋めるので、最初から完璧な文章を書こうとしなくて構いません。
 
-> **まず `/clear`。** `plan mode on` が消えていたら `shift+tab` で plan モードに戻してから実行します。
+> **まず `/clear`。** 実行モードは `accept edit on`（下部表示で確認、違っていれば `shift+tab` で切り替え）。
 
 ```text
 /speckit-specify
@@ -191,7 +193,7 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 `/speckit-specify` を最小限の文章で済ませた分、ここで対話的に詳細を詰めます。`spec.md` の `NEEDS CLARIFICATION` や曖昧な箇所を Claude が質問形式で投げてくるので、回答すると spec.md が更新されます。`/speckit-plan` 前に通すことで手戻りを減らします。
 
-> **まず `/clear`。** `plan mode on` が消えていたら `shift+tab` で plan モードに戻してから実行します。
+> **まず `/clear`。** 実行モードは `accept edit on`（下部表示で確認、違っていれば `shift+tab` で切り替え）。
 
 ```text
 /speckit-clarify
@@ -209,7 +211,7 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 ここから HOW を指示します。`/speckit-specify` から外した技術スタック・配置・DDL 設計をまとめて渡します。
 
-> **まず `/clear`。** `plan mode on` が消えていたら `shift+tab` で plan モードに戻してから実行します。
+> **まず `/clear`。** 実行モードは `accept edit on`（下部表示で確認、違っていれば `shift+tab` で切り替え）。
 
 ```text
 /speckit-plan
@@ -231,7 +233,7 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 ### 1.5. Tasks: `/speckit-tasks` でタスク分解
 
-> **まず `/clear`。** `plan mode on` が消えていたら `shift+tab` で plan モードに戻してから実行します。
+> **まず `/clear`。** 実行モードは `accept edit on`（下部表示で確認、違っていれば `shift+tab` で切り替え）。
 
 ```text
 /speckit-tasks
@@ -243,9 +245,9 @@ IV. YAGNI — 仕様で要求されていない機能（拡張性・設定可能
 
 ここでも実行前に `/clear` します。**会話履歴ゼロの状態から、`tasks.md` / `plan.md` / `spec.md` だけを読んで実装が走る**ことを確認できる、SDD の継続性が最もはっきり見える場面です。
 
-**実行モード: 通常モードで開始します**（`/clear` 直後は plan モードが解除されています）。`/speckit-implement` は `tasks.md` を上から順に実行し、ファイル書き込み・コマンド実行が連続します。承認の手間を減らしたい場合は `shift+tab` で **auto-accept モード**（プロンプト下部の表示が `auto-accept edits on`）にしてください。
+実行モードは他ステップと同じく `accept edit on`（下部表示で確認、違っていれば `shift+tab`）。`/speckit-implement` は `tasks.md` を上から順に実行し、ファイル書き込みとコマンド実行が連続します。コマンド実行の承認も省きたい場合は、さらに `shift+tab` で **auto モード**（`auto mode on` 表示）にしてください。
 
-`/model opusplan` のままなら、plan モード外の実装フェーズは自動的に Sonnet で動くため、ここでのモデル切り替えは不要です。
+`/model opusplan` は `accept edit on`（plan モード外）では Sonnet で動くため、実装は Sonnet のまま進みます。
 
 ```text
 /speckit-implement
