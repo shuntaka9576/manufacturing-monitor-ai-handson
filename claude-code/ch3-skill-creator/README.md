@@ -84,15 +84,35 @@ Anthropic 公式の `anthropics/skills` を marketplace として登録します
 /plugin install example-skills@anthropic-agent-skills
 ```
 
+その後プラグインを認識させます
+
+```text
+/reload-plugins
+```
+
 インストールスコープを聞かれたら Project（`.claude/settings.json` に記録）を選ぶと、チームで共有できる形になります。
+
+実行結果(例)
+
+```
+❯ /plugin install example-skills@anthropic-agent-skills
+  ⎿  ✓ Installed example-skills. Run /reload-plugins to
+     apply.
+
+❯ /reload-plugins
+  ⎿  Reloaded: 1 plugin · 0 skills · 6 agents · 0 hooks · 0
+     plugin MCP servers · 0 plugin LSP servers
+```
 
 ### 1.4. 認識確認（約1分）
 
+
+`/` を入力して補完候補に `skill-creator` が現れることも確認してください。
+
 ```text
-/plugin list
+/skill-creator
 ```
 
-`skill-creator@anthropic-agent-skills` が enabled の状態で表示されていればOKです。`/` を入力して補完候補に `skill-creator` が現れることも確認してください。
 
 #### チェック項目
 
